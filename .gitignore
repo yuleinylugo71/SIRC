@@ -1,0 +1,39 @@
+# Node / Backend
+node_modules/
+dist/
+coverage/
+.env
+.env.local
+.env.development
+.env.production
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Flutter / Mobile
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/build/
+mobile/.pub/
+mobile/.pub-cache/
+mobile/android/app/build/
+mobile/android/app/release/
+mobile/ios/Flutter/App.framework
+mobile/ios/Flutter/Flutter.framework
+mobile/ios/Flutter/Flutter.podspec
+mobile/ios/Runner.xcworkspace/
+mobile/ios/DerivedData/
+mobile/*.apk
+
+# IDE & System Files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# OS / Gemini Agent files
+.system_generated/
