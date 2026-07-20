@@ -35,5 +35,9 @@ mobile/*.apk
 .DS_Store
 Thumbs.db
 
+# Documentos y Archivos locales
+*.docx
+docs/
+
 # OS / Gemini Agent files
 .system_generated/
