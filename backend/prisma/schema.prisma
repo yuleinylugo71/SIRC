@@ -1,0 +1,92 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Usuario {
+  id                  String              @id @default(uuid()) @db.Uuid
+  correo              String              @unique @map("correo")
+  contrasena          String              @map("contrasena")
+  nombre              String?             @map("nombre")
+  rol                 String              @default("REGISTRADOR") @map("rol")
+  version             Int                 @default(1) @map("version")
+  createdAt           DateTime            @default(now()) @map("created_at")
+  updatedAt           DateTime            @updatedAt @map("updated_at")
+  deletedAt           DateTime?           @map("deleted_at")
+  
+  // Dispositivo activo del usuario (vínculo único de sesión)
+  dispositivoActivoId String?             @db.Uuid @map("dispositivo_activo_id")
+  dispositivoActivo   Dispositivo?        @relation("DispositivoActivo", fields: [dispositivoActivoId], references: [id])
+
+  // Relaciones
+  ciudadanos          Ciudadano[]
+  logsSincronizacion  LogSincronizacion[]
+
+  @@map("usuarios")
+}
+
+model Dispositivo {
+  id                 String              @id @default(uuid()) @db.Uuid
+  codigoUnico        String              @unique @map("codigo_unico")
+  nombre             String              @map("nombre")
+  modelo             String?             @map("modelo")
+  sistemaOperativo   String?             @map("sistema_operativo")
+  version            Int                 @default(1) @map("version")
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+  deletedAt          DateTime?           @map("deleted_at")
+
+  // Relaciones
+  ciudadanos         Ciudadano[]
+  logsSincronizacion LogSincronizacion[]
+  usuariosActivos    Usuario[]           @relation("DispositivoActivo")
+
+  @@map("dispositivos")
+}
+
+model Ciudadano {
+  id                        String      @id @default(uuid()) @db.Uuid
+  documentoIdentidad        String      @unique @map("documento_identidad")
+  nombres                   String      @map("nombres")
+  apellidos                 String      @map("apellidos")
+  fechaNacimiento           DateTime    @map("fecha_nacimiento")
+  telefono                  String?     @map("telefono")
+  correo                    String?     @map("correo")
+  estadoSincronizacion      String      @default("PENDIENTE") @map("estado_sincronizacion")
+  registradoPorUsuarioId    String      @map("registrado_por_usuario_id") @db.Uuid
+  registradoEnDispositivoId String      @map("registrado_en_dispositivo_id") @db.Uuid
+  version                   Int         @default(1) @map("version")
+  metadatosCampos           Json?       @map("metadatos_campos")
+  createdAt                 DateTime    @default(now()) @map("created_at")
+  updatedAt                 DateTime    @updatedAt @map("updated_at")
+  deletedAt                 DateTime?   @map("deleted_at")
+
+  // Relaciones/FKs
+  usuario                   Usuario     @relation(fields: [registradoPorUsuarioId], references: [id])
+  dispositivo               Dispositivo @relation(fields: [registradoEnDispositivoId], references: [id])
+
+  @@map("ciudadanos")
+}
+
+model LogSincronizacion {
+  id                  String      @id @default(uuid()) @db.Uuid
+  dispositivoId       String      @map("dispositivo_id") @db.Uuid
+  usuarioId           String      @map("usuario_id") @db.Uuid
+  fechaSincronizacion DateTime    @default(now()) @map("fecha_sincronizacion")
+  estado              String      @map("estado")
+  registrosProcesados Int         @map("registros_procesados")
+  detalles            String?     @map("detalles")
+  version             Int         @default(1) @map("version")
+  createdAt           DateTime    @default(now()) @map("created_at")
+  updatedAt           DateTime    @updatedAt @map("updated_at")
+
+  // Relaciones/FKs
+  dispositivo         Dispositivo @relation(fields: [dispositivoId], references: [id])
+  usuario             Usuario     @relation(fields: [usuarioId], references: [id])
+
+  @@map("logs_sincronizacion")
+}
