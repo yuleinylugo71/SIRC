@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../domain/entities/ciudadano.dart';
 import '../bloc/auth_provider.dart';
 import '../bloc/ciudadanos_provider.dart';
+import '../theme/sirc_theme.dart';
 
 class CiudadanoFormScreen extends ConsumerStatefulWidget {
   final Ciudadano? ciudadano; // Si es null es registro nuevo, si no es edición
@@ -15,26 +16,28 @@ class CiudadanoFormScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<CiudadanoFormScreen> createState() => _CiudadanoFormScreenState();
+  ConsumerState<CiudadanoFormScreen> createState() =>
+      _CiudadanoFormScreenState();
 }
 
 class _CiudadanoFormScreenState extends ConsumerState<CiudadanoFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   late final TextEditingController _documentoController;
   late final TextEditingController _nombresController;
   late final TextEditingController _apellidosController;
   late final TextEditingController _telefonoController;
   late final TextEditingController _correoController;
-  
+
   DateTime? _fechaNacimiento;
 
   @override
   void initState() {
     super.initState();
     final c = widget.ciudadano;
-    
-    _documentoController = TextEditingController(text: c?.documentoIdentidad ?? '');
+
+    _documentoController =
+        TextEditingController(text: c?.documentoIdentidad ?? '');
     _nombresController = TextEditingController(text: c?.nombres ?? '');
     _apellidosController = TextEditingController(text: c?.apellidos ?? '');
     _telefonoController = TextEditingController(text: c?.telefono ?? '');
@@ -63,6 +66,19 @@ class _CiudadanoFormScreenState extends ConsumerState<CiudadanoFormScreen> {
       firstDate: primeraFecha,
       lastDate: ultimaFecha,
       helpText: 'Selecciona la fecha de nacimiento',
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: SircColors.blue,
+              onPrimary: Colors.white,
+              surface: SircColors.surface,
+              onSurface: SircColors.ink,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (fechaSeleccionada != null) {
@@ -78,7 +94,7 @@ class _CiudadanoFormScreenState extends ConsumerState<CiudadanoFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Por favor, selecciona la fecha de nacimiento.'),
-            backgroundColor: Colors.red,
+            backgroundColor: SircColors.error,
           ),
         );
         return;
@@ -90,8 +106,12 @@ class _CiudadanoFormScreenState extends ConsumerState<CiudadanoFormScreen> {
             nombres: _nombresController.text.trim(),
             apellidos: _apellidosController.text.trim(),
             fechaNacimiento: _fechaNacimiento!,
-            telefono: _telefonoController.text.trim().isEmpty ? null : _telefonoController.text.trim(),
-            correo: _correoController.text.trim().isEmpty ? null : _correoController.text.trim(),
+            telefono: _telefonoController.text.trim().isEmpty
+                ? null
+                : _telefonoController.text.trim(),
+            correo: _correoController.text.trim().isEmpty
+                ? null
+                : _correoController.text.trim(),
             registradoPorUsuarioId: usuarioId,
             registradoEnDispositivoId: dispositivoId,
           );
@@ -109,8 +129,8 @@ class _CiudadanoFormScreenState extends ConsumerState<CiudadanoFormScreen> {
     }
 
     final esEdicion = widget.ciudadano != null;
-    final formatoFecha = _fechaNacimiento == null 
-        ? 'No seleccionada' 
+    final formatoFecha = _fechaNacimiento == null
+        ? 'No seleccionada'
         : '${_fechaNacimiento!.day.toString().padLeft(2, '0')}/${_fechaNacimiento!.month.toString().padLeft(2, '0')}/${_fechaNacimiento!.year}';
 
     // Escuchar el guardado exitoso para cerrar la pantalla
@@ -121,10 +141,10 @@ class _CiudadanoFormScreenState extends ConsumerState<CiudadanoFormScreen> {
     });
 
     return Scaffold(
+      backgroundColor: SircColors.background,
       appBar: AppBar(
         title: Text(esEdicion ? 'Editar Ciudadano' : 'Registrar Ciudadano'),
-        backgroundColor: Colors.blue.shade800,
-        foregroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
@@ -138,10 +158,9 @@ class _CiudadanoFormScreenState extends ConsumerState<CiudadanoFormScreen> {
                 controller: _documentoController,
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Documento de Identidad',
-                  prefixIcon: const Icon(Icons.badge_outlined),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  prefixIcon: Icon(Icons.badge_outlined),
                   helperText: 'Solo números (6 a 12 dígitos)',
                 ),
                 validator: (val) {
@@ -154,16 +173,15 @@ class _CiudadanoFormScreenState extends ConsumerState<CiudadanoFormScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
               // Input Nombres
               TextFormField(
                 controller: _nombresController,
                 keyboardType: TextInputType.name,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Nombres',
-                  prefixIcon: const Icon(Icons.person_outline),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  prefixIcon: Icon(Icons.person_outline),
                 ),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) {
@@ -178,16 +196,15 @@ class _CiudadanoFormScreenState extends ConsumerState<CiudadanoFormScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
               // Input Apellidos
               TextFormField(
                 controller: _apellidosController,
                 keyboardType: TextInputType.name,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Apellidos',
-                  prefixIcon: const Icon(Icons.person_outline),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  prefixIcon: Icon(Icons.person_outline),
                 ),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) {
@@ -202,17 +219,18 @@ class _CiudadanoFormScreenState extends ConsumerState<CiudadanoFormScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
               // Selector de Fecha de Nacimiento
-              Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(color: Colors.grey.shade400),
-                  borderRadius: BorderRadius.circular(12),
+              Container(
+                decoration: BoxDecoration(
+                  color: SircColors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: SircColors.border),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 16.0, horizontal: 20.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -221,34 +239,43 @@ class _CiudadanoFormScreenState extends ConsumerState<CiudadanoFormScreen> {
                         children: [
                           const Text(
                             'Fecha de Nacimiento',
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                            style: TextStyle(fontSize: 14, color: SircColors.muted),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             formatoFecha,
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold, color: SircColors.ink),
                           ),
                         ],
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.calendar_month_outlined, color: Colors.blue),
-                        onPressed: () => _seleccionarFecha(context),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: SircColors.blue.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.calendar_month_outlined,
+                              color: SircColors.blue),
+                          onPressed: () => _seleccionarFecha(context),
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
               // Input Teléfono (Opcional)
               TextFormField(
                 controller: _telefonoController,
                 keyboardType: TextInputType.phone,
-                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[0-9+]+$'))],
-                decoration: InputDecoration(
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^[0-9+]+$'))
+                ],
+                decoration: const InputDecoration(
                   labelText: 'Teléfono (Opcional)',
-                  prefixIcon: const Icon(Icons.phone_outlined),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  prefixIcon: Icon(Icons.phone_outlined),
                   helperText: 'Solo números o prefijo + (8 a 15 caracteres)',
                 ),
                 validator: (val) {
@@ -260,56 +287,48 @@ class _CiudadanoFormScreenState extends ConsumerState<CiudadanoFormScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
               // Input Correo (Opcional)
               TextFormField(
                 controller: _correoController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Correo Electrónico (Opcional)',
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  prefixIcon: Icon(Icons.email_outlined),
                 ),
                 validator: (val) {
                   if (val != null && val.trim().isNotEmpty) {
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(val)) {
+                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                        .hasMatch(val)) {
                       return 'Ingresa un correo electrónico válido';
                     }
                   }
                   return null;
                 },
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 40),
 
               // Botón Guardar
-              ElevatedButton(
+              ElevatedButton.icon(
                 onPressed: () => _guardarFormulario(
                   authEstado.usuarioId,
                   authEstado.dispositivoId,
                 ),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.blue.shade800,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: Text(
-                  esEdicion ? 'Actualizar Registro' : 'Registrar Ciudadano',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
+                icon: Icon(esEdicion ? Icons.save_rounded : Icons.person_add_rounded),
+                label: Text(esEdicion ? 'Actualizar Registro' : 'Registrar Ciudadano'),
               ),
-              const SizedBox(height: 12),
-              
+              const SizedBox(height: 24),
+
               // Nota informativa
               const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.lock_outline, size: 14, color: Colors.grey),
+                  Icon(Icons.lock_outline, size: 16, color: SircColors.muted),
                   SizedBox(width: 8),
                   Text(
                     'Los datos se cifran y guardan localmente.',
-                    style: TextStyle(color: Colors.grey, fontSize: 11),
+                    style: TextStyle(color: SircColors.muted, fontSize: 13, fontWeight: FontWeight.w500),
                   ),
                 ],
               ),

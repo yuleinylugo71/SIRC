@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIRC - Registro Ciudadano Inteligente</title>
+  <meta name="description" content="Plataforma de registro ciudadano moderno. Captura datos en cualquier lugar, incluso sin internet.">
+  
+  <!-- Google Fonts & Font Awesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="#" class="brand">
+        <div class="brand-logo">
+          <i class="fa-solid fa-fingerprint"></i>
+        </div>
+        <span class="brand-name">SIRC.</span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="#beneficios">Beneficios</a>
+        <a href="#operacion">Operación</a>
+        <a href="#simulador">Simulador Interactivo</a>
+      </nav>
+
+      <div class="nav-actions">
+        <span class="version-tag">v1.0.0 Release</span>
+        <a href="/app/" class="btn btn-secondary nav-btn">
+          Abrir App Web
+        </a>
+        <a href="downloads/sirc-app-v1.0.apk" download class="btn btn-primary nav-btn">
+          Descargar App
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container hero-container">
+        <div class="hero-content">
+          <div class="pill-badge">
+            <span class="pulse-dot"></span> Plataforma lista para territorio
+          </div>
+          
+          <h1 class="hero-title">
+            Registro ciudadano <br>
+            <span class="text-gradient">sin interrupciones.</span>
+          </h1>
+          
+          <p class="hero-desc">
+            Captura y valida información en cualquier territorio del país. SIRC guarda tus registros de forma segura y los sincroniza automáticamente en cuanto recuperas la conexión.
+          </p>
+
+          <div class="hero-metrics">
+            <div>
+              <strong>100%</strong>
+              <span>modo offline</span>
+            </div>
+            <div>
+              <strong>AES</strong>
+              <span>cifrado local</span>
+            </div>
+            <div>
+              <strong>SQLite</strong>
+              <span>base en dispositivo</span>
+            </div>
+          </div>
+
+          <div class="hero-actions">
+            <a href="downloads/sirc-app-v1.0.apk" download class="btn btn-primary btn-large shadow-glow">
+              <i class="fa-brands fa-android"></i> Instalar APK Oficial
+            </a>
+            <a href="/app/" class="btn btn-primary btn-large">
+              <i class="fa-solid fa-desktop"></i> Entrar desde PC
+            </a>
+            <a href="#simulador" class="btn btn-secondary btn-large">
+              <i class="fa-solid fa-play"></i> Probar Simulador
+            </a>
+          </div>
+
+          <div class="tech-stack">
+            <p>Arquitectura impulsada por:</p>
+            <div class="stack-icons">
+              <i class="fa-brands fa-flutter" title="Flutter"></i>
+              <i class="fa-solid fa-database" title="SQLite"></i>
+              <i class="fa-solid fa-shield-halved" title="AES Encryption"></i>
+              <i class="fa-solid fa-server" title="PostgreSQL"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="hero-graphics">
+          <div class="app-mockup glass-panel">
+            <div class="mockup-header">
+              <div class="window-controls">
+                <span class="w-dot red"></span>
+                <span class="w-dot yellow"></span>
+                <span class="w-dot green"></span>
+              </div>
+              <div class="mockup-title">SIRC Mobile</div>
+            </div>
+            <div class="mockup-body">
+              <div class="mockup-status">
+                <div class="status-left"><i class="fa-solid fa-signal"></i> 4G LTE</div>
+                <div class="status-right">100% <i class="fa-solid fa-battery-full"></i></div>
+              </div>
+              <div class="mockup-user-card">
+                <div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>
+                <div class="user-details">
+                  <h4>Carlos Mendoza</h4>
+                  <p>CC: 1.098.765.432</p>
+                  <span class="tag-synced"><i class="fa-solid fa-check-double"></i> Sincronizado</span>
+                </div>
+              </div>
+              <div class="mockup-progress">
+                <div class="progress-copy">
+                  <span>Lote territorial</span>
+                  <strong>84% validado</strong>
+                </div>
+                <div class="progress-bar"><span></span></div>
+              </div>
+              <div class="mockup-stats">
+                <div class="stat-box">
+                  <h5>Registros Hoy</h5>
+                  <strong>142</strong>
+                </div>
+                <div class="stat-box">
+                  <h5>Pendientes</h5>
+                  <strong>0</strong>
+                </div>
+              </div>
+              <button class="mockup-btn"><i class="fa-solid fa-plus"></i> Nuevo Registro</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Beneficios (Consolidated Features) -->
+    <section id="beneficios" class="section">
+      <div class="container">
+        <div class="section-title-wrapper">
+          <h2>Diseñado para el campo. <br>Pensado para la eficiencia.</h2>
+        </div>
+
+        <div class="benefits-grid">
+          <div class="benefit-card glass-panel">
+            <div class="b-icon primary-icon"><i class="fa-solid fa-wifi-slash"></i></div>
+            <h3>Autonomía Offline</h3>
+            <p>No dependas de la red. Registra datos localmente gracias al motor SQLite embebido que valida información al instante sin latencia.</p>
+          </div>
+          
+          <div class="benefit-card glass-panel">
+            <div class="b-icon secondary-icon"><i class="fa-solid fa-rotate"></i></div>
+            <h3>Sincronización Inteligente</h3>
+            <p>Un demonio en segundo plano monitorea tu red. Al detectar conexión, transfiere los registros pendientes al servidor automáticamente.</p>
+          </div>
+
+          <div class="benefit-card glass-panel">
+            <div class="b-icon accent-icon"><i class="fa-solid fa-lock"></i></div>
+            <h3>Seguridad de Grado Militar</h3>
+            <p>Información cifrada, autenticación por dispositivo único (UUID) y logs inmutables garantizan que cada dato ciudadano esté blindado.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="operacion" class="section operation-section">
+      <div class="container operation-layout">
+        <div>
+          <div class="section-kicker">Control operativo</div>
+          <h2>Una landing más clara para explicar, descargar y demostrar SIRC.</h2>
+          <p>La página presenta el flujo real de trabajo: captura en campo, almacenamiento local, sincronización y consulta de registros enviados al servidor.</p>
+        </div>
+
+        <div class="operation-board">
+          <div class="operation-row">
+            <span><i class="fa-solid fa-mobile-screen"></i> Captura móvil</span>
+            <strong>Activa</strong>
+          </div>
+          <div class="operation-row">
+            <span><i class="fa-solid fa-database"></i> Cola local</span>
+            <strong>2 registros</strong>
+          </div>
+          <div class="operation-row">
+            <span><i class="fa-solid fa-cloud-arrow-up"></i> Sincronización</span>
+            <strong>Automática</strong>
+          </div>
+          <div class="operation-row">
+            <span><i class="fa-solid fa-shield-halved"></i> Seguridad</span>
+            <strong>Cifrada</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Simulator -->
+    <section id="simulador" class="section bg-light">
+      <div class="container">
+        <div class="section-title-wrapper center">
+          <h2>Simulador de Sincronización</h2>
+          <p>Experimenta en vivo cómo SIRC almacena datos sin red y los sincroniza al conectarse.</p>
+        </div>
+
+        <div class="simulator-layout glass-panel shadow-heavy">
+          <div class="sim-header">
+            <div class="sim-brand">
+              <i class="fa-solid fa-terminal"></i> Consola SIRC
+            </div>
+            <div class="network-controller">
+              <label for="network-toggle" class="toggle-label">Estado de Red:</label>
+              <label class="switch">
+                <input type="checkbox" id="network-toggle" checked>
+                <span class="slider"></span>
+              </label>
+              <span id="network-indicator" class="badge-status online">ONLINE</span>
+            </div>
+          </div>
+
+          <div class="sim-grid">
+            <!-- Form Area -->
+            <div class="sim-form-area">
+              <h3><i class="fa-regular fa-id-card"></i> Captura de Datos</h3>
+              <form id="sim-form" class="modern-form">
+                <div class="form-group">
+                  <label for="docId">Documento de Identidad</label>
+                  <input type="text" id="docId" placeholder="Ej: 1098765432" required>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="nombres">Nombres</label>
+                    <input type="text" id="nombres" placeholder="Carlos" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="apellidos">Apellidos</label>
+                    <input type="text" id="apellidos" placeholder="Mendoza" required>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="telefono">Teléfono</label>
+                    <input type="tel" id="telefono" placeholder="300 123 4567">
+                  </div>
+                  <div class="form-group">
+                    <label for="correo">Correo Electrónico</label>
+                    <input type="email" id="correo" placeholder="correo@ejemplo.com">
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">Guardar Registro</button>
+              </form>
+            </div>
+
+            <!-- Dashboard Area -->
+            <div class="sim-dashboard-area">
+              <div class="db-tabs">
+                <button class="db-tab active" data-tab="local-db">
+                  Local <span class="count" id="local-count">0</span>
+                </button>
+                <button class="db-tab" data-tab="cloud-db">
+                  Cloud <span class="count" id="cloud-count">0</span>
+                </button>
+                <button class="db-tab" data-tab="sync-logs">
+                  Logs <span class="count" id="log-count">0</span>
+                </button>
+              </div>
+
+              <div class="tab-contents">
+                <div class="tab-content active" id="local-db">
+                  <div class="table-container">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Documento</th>
+                          <th>Ciudadano</th>
+                          <th>Estado</th>
+                          <th>Acción</th>
+                        </tr>
+                      </thead>
+                      <tbody id="local-records-body"></tbody>
+                    </table>
+                    <div id="local-empty" class="empty-state">Sin registros en memoria local.</div>
+                  </div>
+                </div>
+
+                <div class="tab-content" id="cloud-db">
+                  <div class="table-container">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Documento</th>
+                          <th>Ciudadano</th>
+                          <th>Dispositivo</th>
+                          <th>Fecha Sincronización</th>
+                        </tr>
+                      </thead>
+                      <tbody id="cloud-records-body"></tbody>
+                    </table>
+                    <div id="cloud-empty" class="empty-state">El servidor no ha recibido datos.</div>
+                  </div>
+                </div>
+
+                <div class="tab-content" id="sync-logs">
+                  <div class="log-console" id="log-stream-body">
+                    <div class="log-entry sys">▶ Sistema inicializado.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="section final-cta">
+      <div class="container text-center">
+        <h2>¿Listo para digitalizar tu operación?</h2>
+        <p>Descarga la última versión para dispositivos Android y comienza a registrar de inmediato.</p>
+        <a href="downloads/sirc-app-v1.0.apk" download class="btn btn-primary btn-large shadow-glow mt-2">
+          <i class="fa-solid fa-download"></i> Descargar SIRC v1.0.0 (APK)
+        </a>
+        <a href="/app/" class="btn btn-secondary btn-large mt-2">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir App Web
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <i class="fa-solid fa-fingerprint"></i> SIRC
+      </div>
+      <p class="footer-copy">&copy; 2026 SIRC - Sistema de Información de Registro Ciudadano. Todos los derechos reservados.</p>
+    </div> 
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

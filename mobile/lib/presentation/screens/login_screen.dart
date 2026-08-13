@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../bloc/auth_provider.dart';
+import '../theme/sirc_theme.dart';
+import '../widgets/sirc_background.dart';
+import '../widgets/sirc_logo.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -12,8 +16,8 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _correoController = TextEditingController();
-  final _contrasenaController = TextEditingController();
+  final _correoController = TextEditingController(text: 'admin@sirc.gov');
+  final _contrasenaController = TextEditingController(text: 'admin12345');
   bool _ocultarContrasena = true;
 
   @override
@@ -34,30 +38,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final tema = Theme.of(context);
     final authEstado = ref.watch(authProvider);
 
-    // Escuchar el estado de autenticación para redirigir
     ref.listen<AuthState>(authProvider, (prev, next) {
       if (next is AuthAuthenticated) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Sesión iniciada como: ${next.correo}'),
-            backgroundColor: Colors.green.shade800,
-          ),
-        );
         context.go('/dashboard');
       } else if (next is AuthError) {
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Row(
-              children: [
-                Icon(Icons.error_outline, color: Colors.red),
-                SizedBox(width: 8),
-                Text('Error de Acceso'),
-              ],
-            ),
+            title: const Text('No se pudo ingresar'),
             content: Text(next.mensaje),
             actions: [
               TextButton(
@@ -73,138 +63,179 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final cargando = authEstado is AuthLoading;
 
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Logo SIRC
-                const Icon(
-                  Icons.assignment_ind_outlined,
-                  size: 80,
-                  color: Colors.blue,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'SIRC',
-                  textAlign: TextAlign.center,
-                  style: tema.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue.shade900,
-                  ),
-                ),
-                Text(
-                  'Sistema de Información de Registro Ciudadano',
-                  textAlign: TextAlign.center,
-                  style: tema.textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-                const SizedBox(height: 40),
-
-                // Input de Correo
-                TextFormField(
-                  controller: _correoController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: 'Correo Electrónico',
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  validator: (val) {
-                    if (val == null || val.trim().isEmpty) {
-                      return 'Ingresa tu correo';
-                    }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(val)) {
-                      return 'Ingresa un correo electrónico válido';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // Input de Contraseña
-                TextFormField(
-                  controller: _contrasenaController,
-                  obscureText: _ocultarContrasena,
-                  decoration: InputDecoration(
-                    labelText: 'Contraseña',
-                    prefixIcon: const Icon(Icons.lock_outlined),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _ocultarContrasena ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _ocultarContrasena = !_ocultarContrasena;
-                        });
-                      },
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  validator: (val) {
-                    if (val == null || val.isEmpty) {
-                      return 'Ingresa tu contraseña';
-                    }
-                    if (val.length < 6) {
-                      return 'La contraseña debe tener mínimo 6 caracteres';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-
-                // Botón de Login
-                ElevatedButton(
-                  onPressed: cargando ? null : _intentarLogin,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Colors.blue.shade800,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: cargando
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+      body: SircBackground(
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 22,
+                            vertical: 18,
                           ),
-                        )
-                      : const Text(
-                          'Iniciar Sesión',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.76),
+                            borderRadius: BorderRadius.circular(34),
+                            border: Border.all(color: Colors.white),
+                            boxShadow: [
+                              BoxShadow(
+                                color: SircColors.blue.withOpacity(0.10),
+                                blurRadius: 30,
+                                offset: const Offset(0, 16),
+                              ),
+                            ],
                           ),
+                          child: const SircLogo(size: 118, showText: false),
                         ),
+                      ),
+                      const SizedBox(height: 26),
+                      Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.86),
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(color: Colors.white),
+                          boxShadow: [
+                            BoxShadow(
+                              color: SircColors.blue.withOpacity(0.10),
+                              blurRadius: 35,
+                              offset: const Offset(0, 18),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const Text(
+                              'Acceso operativo',
+                              style: TextStyle(
+                                color: SircColors.ink,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              'Ingresa para registrar, consultar y sincronizar datos.',
+                              style: TextStyle(
+                                color: SircColors.muted,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+                            TextFormField(
+                              controller: _correoController,
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: const InputDecoration(
+                                labelText: 'Correo',
+                                prefixIcon: Icon(Icons.mail_outline_rounded),
+                              ),
+                              validator: (val) {
+                                if (val == null || val.trim().isEmpty) {
+                                  return 'Ingresa tu correo';
+                                }
+                                if (!RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                    .hasMatch(val)) {
+                                  return 'Ingresa un correo valido';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _contrasenaController,
+                              obscureText: _ocultarContrasena,
+                              decoration: InputDecoration(
+                                labelText: 'Contrasena',
+                                prefixIcon:
+                                    const Icon(Icons.lock_outline_rounded),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _ocultarContrasena
+                                        ? Icons.visibility_outlined
+                                        : Icons.visibility_off_outlined,
+                                  ),
+                                  onPressed: () {
+                                    setState(() => _ocultarContrasena =
+                                        !_ocultarContrasena);
+                                  },
+                                ),
+                              ),
+                              validator: (val) {
+                                if (val == null || val.isEmpty)
+                                  return 'Ingresa tu contrasena';
+                                if (val.length < 6)
+                                  return 'Minimo 6 caracteres';
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 22),
+                            PressableCard(
+                              borderRadius: BorderRadius.circular(18),
+                              onTap: cargando ? null : _intentarLogin,
+                              child: Container(
+                                height: 58,
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      SircColors.blue,
+                                      SircColors.blueLight
+                                    ],
+                                    begin: Alignment.centerLeft,
+                                    end: Alignment.centerRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(18),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: SircColors.blue.withOpacity(0.28),
+                                      blurRadius: 18,
+                                      offset: const Offset(0, 10),
+                                    ),
+                                  ],
+                                ),
+                                child: Center(
+                                  child: cargando
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.5,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : const Text(
+                                          'Entrar',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.w900,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      const Text(
+                        'Disponible para trabajo local y sincronizacion posterior.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: SircColors.muted, fontSize: 12),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 16),
-                
-                // Indicador Offline
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.wifi_off_outlined, size: 16, color: Colors.grey),
-                    SizedBox(width: 8),
-                    Text(
-                      'Soporta inicio de sesión sin conexión',
-                      style: TextStyle(color: Colors.grey, fontSize: 12),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
           ),
         ),

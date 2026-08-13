@@ -68,8 +68,34 @@ model Ciudadano {
   // Relaciones/FKs
   usuario                   Usuario     @relation(fields: [registradoPorUsuarioId], references: [id])
   dispositivo               Dispositivo @relation(fields: [registradoEnDispositivoId], references: [id])
+  historial                 CiudadanoHistorial[]
 
   @@map("ciudadanos")
+}
+
+model CiudadanoHistorial {
+  id                        String      @id @default(uuid()) @db.Uuid
+  ciudadanoId               String      @map("ciudadano_id") @db.Uuid
+  version                   Int         @map("version")
+  documentoIdentidad        String      @map("documento_identidad")
+  nombres                   String      @map("nombres")
+  apellidos                 String      @map("apellidos")
+  fechaNacimiento           DateTime    @map("fecha_nacimiento")
+  telefono                  String?     @map("telefono")
+  correo                    String?     @map("correo")
+  estadoSincronizacion      String      @map("estado_sincronizacion")
+  registradoPorUsuarioId    String      @map("registrado_por_usuario_id") @db.Uuid
+  registradoEnDispositivoId String      @map("registrado_en_dispositivo_id") @db.Uuid
+  metadatosCampos           Json?       @map("metadatos_campos")
+  originalCreatedAt         DateTime    @map("original_created_at")
+  originalUpdatedAt         DateTime    @map("original_updated_at")
+  snapshotCreatedAt         DateTime    @default(now()) @map("snapshot_created_at")
+  motivo                    String      @map("motivo")
+
+  ciudadano                 Ciudadano   @relation(fields: [ciudadanoId], references: [id])
+
+  @@index([ciudadanoId, version])
+  @@map("ciudadano_historial")
 }
 
 model LogSincronizacion {

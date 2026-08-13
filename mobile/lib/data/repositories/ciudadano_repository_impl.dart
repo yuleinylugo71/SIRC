@@ -144,6 +144,14 @@ class CiudadanoRepositoryImpl implements CiudadanoRepository {
       createdAt: DateTime.now(),
     );
 
+    if (ciudadanoExistente != null) {
+      await _ciudadanoDao.registrarVersionAnterior(
+        ciudadanoExistente,
+        historialId: _uuid.v4(),
+        motivo: 'Edicion local',
+      );
+    }
+
     await _syncQueueDao.guardarCiudadanoConCola(ciudadano: local, tarea: tarea);
   }
 
@@ -176,6 +184,14 @@ class CiudadanoRepositoryImpl implements CiudadanoRepository {
       intentos: 0,
       createdAt: DateTime.now(),
     );
+
+    if (ciudadanoExistente != null) {
+      await _ciudadanoDao.registrarVersionAnterior(
+        ciudadanoExistente,
+        historialId: _uuid.v4(),
+        motivo: 'Antes de eliminar',
+      );
+    }
 
     await _syncQueueDao.eliminarCiudadanoConCola(ciudadanoId: id, tarea: tarea);
   }

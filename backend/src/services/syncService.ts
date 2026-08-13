@@ -1,5 +1,6 @@
 import { prisma } from '../database/prisma';
 import { logger } from '../core/logger';
+import { registrarVersionCiudadano } from './ciudadanoHistorialService';
 
 export interface SyncTaskPayload {
   id: string; // ID de la tarea en la cola del cliente
@@ -76,50 +77,52 @@ export class SyncService {
 
     // A. DETECCION DE DUPLICADOS POR NUMERO DE DOCUMENTO (CÉDULA)
     // Buscamos si existe un ciudadano registrado con el mismo documento pero con diferente ID (UUID)
-    const duplicadoCédula = await prisma.ciudadano.findFirst({
+    const duplicadoCedula = await prisma.ciudadano.findFirst({
       where: {
         documentoIdentidad,
         id: { not: ciudadanoId },
       },
     });
 
-    if (duplicadoCédula) {
+    if (duplicadoCedula) {
       logger.warn(
-        `Colisión lógica detectada: Documento ${documentoIdentidad} enviado con ID ${ciudadanoId} ya existe con ID ${duplicadoCédula.id}. Iniciando unificación.`
+        `Colisión lógica detectada: Documento ${documentoIdentidad} enviado con ID ${ciudadanoId} ya existe con ID ${duplicadoCedula.id}. Iniciando unificación.`
       );
 
-      // Unificamos bajo el UUID ganador del servidor (duplicadoCédula.id)
+      // Unificamos bajo el UUID ganador del servidor (duplicadoCedula.id)
       const fusion = this.fusionarLwwPorCampo(
-        duplicadoCédula,
+        duplicadoCedula,
         payloadJson,
-        (duplicadoCédula.metadatosCampos as unknown as MetadatosCampos) || {},
+        (duplicadoCedula.metadatosCampos as unknown as MetadatosCampos) || {},
         payloadJson.metadatos_campos || {}
       );
 
       // Actualizar el registro ganador en PostgreSQL con los campos fusionados
+      await registrarVersionCiudadano(duplicadoCedula, 'Antes de unificar por sincronizacion');
+
       const registroGanadorActualizado = await prisma.ciudadano.update({
-        where: { id: duplicadoCédula.id },
+        where: { id: duplicadoCedula.id },
         data: {
           nombres: fusion.datos.nombres,
           apellidos: fusion.datos.apellidos,
           fechaNacimiento: new Date(fusion.datos.fecha_nacimiento),
           telefono: fusion.datos.telefono,
           correo: fusion.datos.correo,
-          version: Math.max(duplicadoCédula.version, payloadJson.version) + 1,
+          version: Math.max(duplicadoCedula.version, payloadJson.version) + 1,
           metadatosCampos: fusion.metadatos as any,
           updatedAt: new Date(),
           deletedAt: fusion.datos.deleted_at ? new Date(fusion.datos.deleted_at) : null,
         },
       });
 
-      await this.registrarLog(dispositivoId, usuarioId, `UNIFICACION_DUPLICADO_ID:${duplicadoCédula.id}`);
+      await this.registrarLog(dispositivoId, usuarioId, `UNIFICACION_DUPLICADO_ID:${duplicadoCedula.id}`);
 
       // Retornar conflicto e indicarle al cliente el UUID ganador para unificar su base SQLite local
       return {
         id: tarea.id,
         success: true,
         conflicto: true,
-        unificadoId: duplicadoCédula.id,
+        unificadoId: duplicadoCedula.id,
         datosServidor: {
           id: registroGanadorActualizado.id,
           documento_identidad: registroGanadorActualizado.documentoIdentidad,
@@ -136,6 +139,13 @@ export class SyncService {
 
     // B. MANEJO DE OPERACION DELETE
     if (tarea.operacion === 'DELETE') {
+      const ciudadanoAntesEliminar = await prisma.ciudadano.findUnique({
+        where: { id: ciudadanoId },
+      });
+      if (ciudadanoAntesEliminar) {
+        await registrarVersionCiudadano(ciudadanoAntesEliminar, 'Antes de eliminar por sincronizacion');
+      }
+
       await prisma.ciudadano.updateMany({
         where: { id: ciudadanoId },
         data: {
@@ -187,6 +197,8 @@ export class SyncService {
     );
 
     // Actualizar registro en PostgreSQL
+    await registrarVersionCiudadano(ciudadanoExistente, 'Antes de actualizar por sincronizacion');
+
     const registroActualizado = await prisma.ciudadano.update({
       where: { id: ciudadanoId },
       data: {
@@ -298,3 +310,4 @@ export class SyncService {
     }
   }
 }
+

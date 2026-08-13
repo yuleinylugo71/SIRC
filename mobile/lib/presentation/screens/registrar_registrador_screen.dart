@@ -2,20 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/di/providers.dart';
 import '../bloc/auth_provider.dart';
+import '../theme/sirc_theme.dart';
 
 class RegistrarRegistradorScreen extends ConsumerStatefulWidget {
   const RegistrarRegistradorScreen({super.key});
 
   @override
-  ConsumerState<RegistrarRegistradorScreen> createState() => _RegistrarRegistradorScreenState();
+  ConsumerState<RegistrarRegistradorScreen> createState() =>
+      _RegistrarRegistradorScreenState();
 }
 
-class _RegistrarRegistradorScreenState extends ConsumerState<RegistrarRegistradorScreen> {
+class _RegistrarRegistradorScreenState
+    extends ConsumerState<RegistrarRegistradorScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nombreController = TextEditingController();
   final _correoController = TextEditingController();
   final _contrasenaController = TextEditingController();
-  
+
   bool _cargando = false;
   bool _mostrarContrasena = false;
 
@@ -46,7 +49,7 @@ class _RegistrarRegistradorScreenState extends ConsumerState<RegistrarRegistrado
 
     try {
       final registrarUseCase = ref.read(registrarUsuarioUseCaseProvider);
-      
+
       await registrarUseCase.ejecutar(
         correo: _correoController.text.trim(),
         contrasena: _contrasenaController.text,
@@ -56,17 +59,18 @@ class _RegistrarRegistradorScreenState extends ConsumerState<RegistrarRegistrado
 
       if (mounted) {
         setState(() => _cargando = false);
-        
+
         // Mostrar Dialog de Éxito
         showDialog(
           context: context,
           barrierDismissible: false,
           builder: (BuildContext context) {
             return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
               title: const Row(
                 children: [
-                  Icon(Icons.check_circle, color: Colors.green, size: 28),
+                  Icon(Icons.check_circle, color: SircColors.blue, size: 28),
                   SizedBox(width: 8),
                   Text('Registro Exitoso'),
                 ],
@@ -78,9 +82,11 @@ class _RegistrarRegistradorScreenState extends ConsumerState<RegistrarRegistrado
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop(); // Cerrar dialog
-                    Navigator.of(context).pop(); // Volver a la pantalla anterior
+                    Navigator.of(context)
+                        .pop(); // Volver a la pantalla anterior
                   },
-                  child: const Text('Entendido', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const Text('Entendido',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ],
             );
@@ -90,13 +96,14 @@ class _RegistrarRegistradorScreenState extends ConsumerState<RegistrarRegistrado
     } catch (e) {
       if (mounted) {
         setState(() => _cargando = false);
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString().replaceAll('Exception: ', '')),
             backgroundColor: Colors.red.shade800,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
       }
@@ -108,7 +115,7 @@ class _RegistrarRegistradorScreenState extends ConsumerState<RegistrarRegistrado
     return Scaffold(
       appBar: AppBar(
         title: const Text('Registrar Agente'),
-        backgroundColor: Colors.blue.shade900,
+        backgroundColor: SircColors.blue,
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -122,15 +129,15 @@ class _RegistrarRegistradorScreenState extends ConsumerState<RegistrarRegistrado
               Center(
                 child: Column(
                   children: [
-                    Icon(Icons.admin_panel_settings, size: 72, color: Colors.blue.shade800),
+                    const Icon(Icons.admin_panel_settings,
+                        size: 72, color: SircColors.blue),
                     const SizedBox(height: 12),
                     Text(
                       'Nuevo Registrador de Campo',
                       style: TextStyle(
-                        fontSize: 20, 
-                        fontWeight: FontWeight.bold, 
-                        color: Colors.blue.shade900
-                      ),
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: SircColors.blueDark),
                     ),
                     const SizedBox(height: 6),
                     const Text(
@@ -150,7 +157,8 @@ class _RegistrarRegistradorScreenState extends ConsumerState<RegistrarRegistrado
                 decoration: InputDecoration(
                   labelText: 'Nombre Completo',
                   prefixIcon: const Icon(Icons.person_outline),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
                   filled: true,
                   fillColor: Colors.grey.shade50,
                 ),
@@ -173,7 +181,8 @@ class _RegistrarRegistradorScreenState extends ConsumerState<RegistrarRegistrado
                 decoration: InputDecoration(
                   labelText: 'Correo Electrónico',
                   prefixIcon: const Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
                   filled: true,
                   fillColor: Colors.grey.shade50,
                 ),
@@ -182,7 +191,8 @@ class _RegistrarRegistradorScreenState extends ConsumerState<RegistrarRegistrado
                     return 'Por favor ingresa el correo electrónico.';
                   }
                   // Validación simple de regex
-                  final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                  final emailRegex =
+                      RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
                   if (!emailRegex.hasMatch(value.trim())) {
                     return 'Ingresa un formato de correo válido.';
                   }
@@ -199,10 +209,14 @@ class _RegistrarRegistradorScreenState extends ConsumerState<RegistrarRegistrado
                   labelText: 'Contraseña Temporal',
                   prefixIcon: const Icon(Icons.lock_outlined),
                   suffixIcon: IconButton(
-                    icon: Icon(_mostrarContrasena ? Icons.visibility : Icons.visibility_off),
-                    onPressed: () => setState(() => _mostrarContrasena = !_mostrarContrasena),
+                    icon: Icon(_mostrarContrasena
+                        ? Icons.visibility
+                        : Icons.visibility_off),
+                    onPressed: () => setState(
+                        () => _mostrarContrasena = !_mostrarContrasena),
                   ),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
                   filled: true,
                   fillColor: Colors.grey.shade50,
                 ),
@@ -223,9 +237,10 @@ class _RegistrarRegistradorScreenState extends ConsumerState<RegistrarRegistrado
                 onPressed: _cargando ? null : _enviarFormulario,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.blue.shade800,
+                  backgroundColor: SircColors.blue,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                   elevation: 2,
                 ),
                 child: _cargando
@@ -233,13 +248,14 @@ class _RegistrarRegistradorScreenState extends ConsumerState<RegistrarRegistrado
                         width: 24,
                         height: 24,
                         child: CircularProgressIndicator(
-                          strokeWidth: 3, 
+                          strokeWidth: 3,
                           color: Colors.white,
                         ),
                       )
                     : const Text(
                         'Registrar Agente',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
               ),
             ],

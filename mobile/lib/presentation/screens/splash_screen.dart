@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../bloc/auth_provider.dart';
+import '../theme/sirc_theme.dart';
+import '../widgets/sirc_logo.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -20,7 +22,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Future<void> _verificarSesion() async {
     // Retrasar artificialmente para animar el splash screen
     await Future.delayed(const Duration(seconds: 2));
-    
+
     await ref.read(authProvider.notifier).inicializarSesion();
     final estado = ref.read(authProvider);
 
@@ -43,18 +45,31 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Colors.blue.shade900,
-              Colors.blue.shade700,
+              SircColors.blueDark,
+              SircColors.blue,
+              SircColors.blueLight,
             ],
           ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.assignment_ind_outlined,
-              size: 96,
-              color: Colors.white,
+            Container(
+              width: 128,
+              height: 128,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(34),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.16),
+                    blurRadius: 26,
+                    offset: const Offset(0, 14),
+                  ),
+                ],
+              ),
+              child: const SircLogo(size: 92, showText: false),
             ),
             const SizedBox(height: 24),
             const Text(

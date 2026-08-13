@@ -19,6 +19,7 @@ import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/obtener_ciudadanos_usecase.dart';
 import '../../domain/usecases/procesar_sincronizacion_usecase.dart';
 import '../../domain/usecases/registrar_usuario_usecase.dart';
+import '../config/api_config.dart';
 import '../network/dispositivo_info.dart';
 import '../network/network_info.dart';
 
@@ -29,12 +30,9 @@ final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
 
 final dioProvider = Provider<Dio>((ref) {
   return Dio(BaseOptions(
-    baseUrl: 'https://pebbly-placard-fling.ngrok-free.dev',
+    baseUrl: ApiConfig.baseUrl,
     connectTimeout: const Duration(seconds: 5),
     receiveTimeout: const Duration(seconds: 5),
-    headers: {
-      'ngrok-skip-browser-warning': 'true',
-    },
   ));
 });
 

@@ -3,6 +3,7 @@ import { prisma } from '../database/prisma';
 import { BadRequestError, NotFoundError } from '../core/exceptions';
 import { logger } from '../core/logger';
 import { z } from 'zod';
+import { registrarVersionCiudadano } from '../services/ciudadanoHistorialService';
 
 // Esquema de Validación de Ciudadano con Zod
 const ciudadanoSchema = z.object({
@@ -22,7 +23,8 @@ export class CitizenController {
       logger.info(`Listando ciudadanos activos para usuario: ${user?.email || 'desconocido'} (rol: ${user?.role || 'TODOS'})`);
       
       const whereCondition: any = { deletedAt: null };
-      if (user && user.role !== 'ADMIN') {
+      const esAdmin = user?.role?.trim().toUpperCase() === 'ADMIN';
+      if (user && !esAdmin) {
         whereCondition.registradoPorUsuarioId = user.id;
       }
 
@@ -140,6 +142,8 @@ export class CitizenController {
 
       logger.info(`Actualizando ciudadano directo vía API: ${existente.nombres} -> ${parsedBody.nombres}`);
 
+      await registrarVersionCiudadano(existente, 'Antes de actualizar por API');
+
       const actualizado = await prisma.ciudadano.update({
         where: { id: uuid },
         data: {
@@ -177,6 +181,8 @@ export class CitizenController {
       }
 
       logger.info(`Eliminando lógicamente ciudadano directo vía API ID: ${uuid}`);
+
+      await registrarVersionCiudadano(existente, 'Antes de eliminar por API');
 
       await prisma.ciudadano.update({
         where: { id: uuid },

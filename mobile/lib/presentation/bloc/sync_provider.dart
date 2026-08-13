@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../core/di/providers.dart';
 import '../../domain/usecases/procesar_sincronizacion_usecase.dart';
 
@@ -26,16 +27,19 @@ class SyncNotifier extends StateNotifier<SyncState> {
   Future<void> sincronizar() async {
     state = SyncLoading();
     try {
-      final pendientes = await _procesarSincronizacionUseCase.obtenerTareasPendientes();
-      if (pendientes == 0) {
-        state = SyncSuccess('No hay cambios locales pendientes de sincronizar.');
-        return;
-      }
+      final pendientes =
+          await _procesarSincronizacionUseCase.obtenerTareasPendientes();
 
       await _procesarSincronizacionUseCase.ejecutar();
-      state = SyncSuccess('Sincronización finalizada exitosamente.');
+      state = SyncSuccess(
+        pendientes == 0
+            ? 'Datos actualizados desde el servidor.'
+            : 'Sincronizacion finalizada exitosamente.',
+      );
     } catch (e) {
-      state = SyncError('Error en sincronización: ${e.toString().replaceAll('Exception: ', '')}');
+      state = SyncError(
+        'Error en sincronizacion: ${e.toString().replaceAll('Exception: ', '')}',
+      );
     }
   }
 }

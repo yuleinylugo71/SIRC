@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../bloc/auth_provider.dart';
 import '../bloc/sync_provider.dart';
+import '../theme/sirc_theme.dart';
 
 class ConfiguracionScreen extends ConsumerWidget {
   const ConfiguracionScreen({super.key});
@@ -12,7 +13,8 @@ class ConfiguracionScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Cerrar Sesión'),
-        content: const Text('¿Deseas cerrar tu sesión? Se eliminará la información temporal del dispositivo local.'),
+        content: const Text(
+            '¿Deseas cerrar tu sesión? Se eliminará la información temporal del dispositivo local.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -25,7 +27,8 @@ class ConfiguracionScreen extends ConsumerWidget {
               context.go('/login');
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Cerrar Sesión', style: TextStyle(color: Colors.white)),
+            child: const Text('Cerrar Sesión',
+                style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -45,7 +48,7 @@ class ConfiguracionScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Configuración'),
-        backgroundColor: Colors.blue.shade900,
+        backgroundColor: SircColors.blue,
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -56,11 +59,15 @@ class ConfiguracionScreen extends ConsumerWidget {
             // Sección Dispositivo
             const Text(
               'Dispositivo de Registro',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey),
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey),
             ),
             const SizedBox(height: 8),
             Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -75,7 +82,7 @@ class ConfiguracionScreen extends ConsumerWidget {
                       label: 'Estado de Licencia',
                       value: 'Activa (Dispositivo Exclusivo)',
                       icon: Icons.verified_user_outlined,
-                      colorValue: Colors.green,
+                      colorValue: SircColors.blue,
                     ),
                   ],
                 ),
@@ -86,11 +93,15 @@ class ConfiguracionScreen extends ConsumerWidget {
             // Sección Usuario
             const Text(
               'Información de Usuario',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey),
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey),
             ),
             const SizedBox(height: 8),
             Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -119,9 +130,10 @@ class ConfiguracionScreen extends ConsumerWidget {
               label: const Text('Forzar Sincronización Manual'),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: Colors.blue.shade900,
+                backgroundColor: SircColors.blue,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
             ),
             const SizedBox(height: 16),
@@ -130,11 +142,14 @@ class ConfiguracionScreen extends ConsumerWidget {
             OutlinedButton.icon(
               onPressed: () => _confirmarCierreSesion(context, ref),
               icon: const Icon(Icons.exit_to_app, color: Colors.red),
-              label: const Text('Cerrar Sesión', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+              label: const Text('Cerrar Sesión',
+                  style: TextStyle(
+                      color: Colors.red, fontWeight: FontWeight.bold)),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 side: const BorderSide(color: Colors.red),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
             ),
           ],
@@ -164,7 +179,7 @@ class _ConfigRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: Colors.blue.shade800),
+          Icon(icon, size: 20, color: SircColors.blue),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

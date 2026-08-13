@@ -26,6 +26,7 @@ mobile/ios/Flutter/Flutter.podspec
 mobile/ios/Runner.xcworkspace/
 mobile/ios/DerivedData/
 mobile/*.apk
+landing/downloads/*.apk
 
 # IDE & System Files
 .idea/

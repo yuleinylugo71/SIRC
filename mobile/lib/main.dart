@@ -6,6 +6,7 @@ import 'core/di/providers.dart';
 import 'core/router/app_router.dart';
 import 'data/datasources/local/sync_service.dart';
 import 'presentation/bloc/auth_provider.dart';
+import 'presentation/theme/sirc_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,7 +21,8 @@ void main() async {
 
   // Inicializar demonio de sincronización automática de fondo
   final syncService = SyncService(
-    procesarSincronizacionUseCase: container.read(procesarSincronizacionUseCaseProvider),
+    procesarSincronizacionUseCase:
+        container.read(procesarSincronizacionUseCaseProvider),
     connectivity: container.read(connectivityProvider),
   );
   syncService.inicializar();
@@ -44,13 +46,7 @@ class SircApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'SIRC - Registro Ciudadano',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.light,
-        ),
-      ),
+      theme: SircTheme.light(),
       routerConfig: appRouter,
     );
   }

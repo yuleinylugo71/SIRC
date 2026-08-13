@@ -66,18 +66,47 @@ class SyncQueue extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+const _crearTablaHistorialCiudadanoSql = '''
+CREATE TABLE IF NOT EXISTS ciudadano_historial (
+  id TEXT PRIMARY KEY NOT NULL,
+  ciudadano_id TEXT NOT NULL,
+  version INTEGER NOT NULL,
+  documento_identidad TEXT NOT NULL,
+  nombres TEXT NOT NULL,
+  apellidos TEXT NOT NULL,
+  fecha_nacimiento INTEGER NOT NULL,
+  telefono TEXT NULL,
+  correo TEXT NULL,
+  estado_sincronizacion TEXT NOT NULL,
+  registrado_por_usuario_id TEXT NOT NULL,
+  registrado_en_dispositivo_id TEXT NOT NULL,
+  metadatos_campos TEXT NULL,
+  original_created_at INTEGER NOT NULL,
+  original_updated_at INTEGER NOT NULL,
+  snapshot_created_at INTEGER NOT NULL,
+  motivo TEXT NOT NULL
+);
+''';
+
+const _crearIndiceHistorialCiudadanoSql = '''
+CREATE INDEX IF NOT EXISTS idx_ciudadano_historial_ciudadano_id
+ON ciudadano_historial (ciudadano_id, version DESC);
+''';
+
 @DriftDatabase(tables: [Usuarios, Ciudadanos, SyncQueue], daos: [UsuarioDao, CiudadanoDao, SyncQueueDao])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(conn.abrirConexion());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
       onCreate: (m) async {
         await m.createAll();
+        await customStatement(_crearTablaHistorialCiudadanoSql);
+        await customStatement(_crearIndiceHistorialCiudadanoSql);
         
         // Sembrar el usuario administrador por defecto para soporte de login offline instantáneo
         // Contraseña: admin12345 (hasheada con BCrypt)
@@ -93,6 +122,10 @@ class AppDatabase extends _$AppDatabase {
         ));
       },
       onUpgrade: (m, from, to) async {
+        if (from < 2) {
+          await customStatement(_crearTablaHistorialCiudadanoSql);
+          await customStatement(_crearIndiceHistorialCiudadanoSql);
+        }
         // Lógica de migraciones de base de datos futura
       },
     );

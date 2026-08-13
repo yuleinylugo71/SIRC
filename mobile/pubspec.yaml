@@ -42,13 +42,12 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: false
-  image_path: "assets/icon/logo.png"
+  image_path: "assets/icon/logosinfondo.png"
   web:
     generate: true
-    image_path: "assets/icon/logo.png"
+    image_path: "assets/icon/logosinfondo.png"
 
 flutter:
   uses-material-design: true
   assets:
-    - assets/icon/logo.png
-
+    - assets/icon/logosinfondo.png

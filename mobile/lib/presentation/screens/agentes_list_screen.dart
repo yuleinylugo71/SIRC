@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/di/providers.dart';
 import '../../domain/entities/usuario.dart';
 import '../bloc/auth_provider.dart';
+import '../theme/sirc_theme.dart';
 
 class AgentesListScreen extends ConsumerStatefulWidget {
   const AgentesListScreen({super.key});
@@ -61,7 +62,7 @@ class _AgentesListScreenState extends ConsumerState<AgentesListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Listado de Agentes'),
-        backgroundColor: Colors.blue.shade900,
+        backgroundColor: SircColors.blue,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -132,11 +133,14 @@ class _AgentesListScreenState extends ConsumerState<AgentesListScreen> {
 
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               leading: CircleAvatar(
-                backgroundColor: esAdmin ? Colors.orange.shade800 : Colors.blue.shade700,
+                backgroundColor:
+                    esAdmin ? SircColors.blueDark : SircColors.blue,
                 child: Icon(
                   esAdmin ? Icons.admin_panel_settings : Icons.person_outline,
                   color: Colors.white,
@@ -144,7 +148,8 @@ class _AgentesListScreenState extends ConsumerState<AgentesListScreen> {
               ),
               title: Text(
                 agente.nombre ?? agente.correo,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,7 +161,7 @@ class _AgentesListScreenState extends ConsumerState<AgentesListScreen> {
                     'Rol: ${agente.rol}',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: esAdmin ? Colors.orange.shade900 : Colors.blue.shade900,
+                      color: esAdmin ? SircColors.blueDark : SircColors.blue,
                     ),
                   ),
                 ],
