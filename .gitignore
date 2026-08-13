@@ -27,6 +27,7 @@ mobile/ios/Runner.xcworkspace/
 mobile/ios/DerivedData/
 mobile/*.apk
 landing/downloads/*.apk
+!landing/downloads/sirc-app-v1.0.apk
 
 # IDE & System Files
 .idea/
