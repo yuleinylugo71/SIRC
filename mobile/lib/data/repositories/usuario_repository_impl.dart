@@ -80,8 +80,7 @@ class UsuarioRepositoryImpl implements UsuarioRepository {
         throw Exception('Error en el servidor al intentar iniciar sesión');
       }
     } on DioException catch (e) {
-      final errorMsg = e.response?.data?['message'] ?? 'Error de conexión con el servidor';
-      throw Exception(errorMsg);
+      throw Exception(_mensajeErrorDio(e, 'Error de conexion con el servidor'));
     }
   }
 
@@ -129,8 +128,7 @@ class UsuarioRepositoryImpl implements UsuarioRepository {
         ),
       );
     } on DioException catch (e) {
-      final errorMsg = e.response?.data?['message'] ?? 'Error de conexión con el servidor';
-      throw Exception(errorMsg);
+      throw Exception(_mensajeErrorDio(e, 'Error de conexion con el servidor'));
     }
   }
 
@@ -162,8 +160,7 @@ class UsuarioRepositoryImpl implements UsuarioRepository {
       }
       return [];
     } on DioException catch (e) {
-      final errorMsg = e.response?.data?['message'] ?? 'Error al obtener la lista de usuarios';
-      throw Exception(errorMsg);
+      throw Exception(_mensajeErrorDio(e, 'Error al obtener la lista de usuarios'));
     }
   }
 
@@ -177,5 +174,29 @@ class UsuarioRepositoryImpl implements UsuarioRepository {
       createdAt: local.createdAt,
       updatedAt: local.updatedAt,
     );
+  }
+
+  String _mensajeErrorDio(DioException e, String fallback) {
+    final data = e.response?.data;
+    if (data is Map) {
+      final message = data['message'];
+      if (message != null && message.toString().trim().isNotEmpty) {
+        return message.toString();
+      }
+    }
+
+    if (data is String && data.trim().isNotEmpty) {
+      final body = data.trim();
+      if (!body.startsWith('<')) {
+        return body;
+      }
+    }
+
+    final statusCode = e.response?.statusCode;
+    if (statusCode != null) {
+      return '$fallback (HTTP $statusCode)';
+    }
+
+    return fallback;
   }
 }

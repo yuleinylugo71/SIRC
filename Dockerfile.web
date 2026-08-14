@@ -4,6 +4,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=8080
+ENV API_INTERNAL_URL=http://sirc-api:3000
 
 COPY landing ./
 

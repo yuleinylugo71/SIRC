@@ -1,9 +1,12 @@
 const http = require('http');
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.PORT || 8080;
 const PUBLIC_DIR = path.resolve(__dirname);
+const API_INTERNAL_URL = process.env.API_INTERNAL_URL || 'http://sirc-api:3000';
+const API_PROXY_PATHS = ['/api', '/api-docs', '/health'];
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -18,9 +21,52 @@ const MIME_TYPES = {
   '.apk': 'application/vnd.android.package-archive',
 };
 
+function shouldProxyToApi(pathname) {
+  return API_PROXY_PATHS.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
+
+function proxyToApi(req, res) {
+  const target = new URL(req.url, API_INTERNAL_URL);
+  const client = target.protocol === 'https:' ? https : http;
+  const headers = {
+    ...req.headers,
+    host: target.host,
+    'x-forwarded-host': req.headers.host || '',
+    'x-forwarded-proto': req.headers['x-forwarded-proto'] || 'https',
+  };
+
+  const proxyReq = client.request(
+    target,
+    {
+      method: req.method,
+      headers,
+    },
+    (proxyRes) => {
+      res.writeHead(proxyRes.statusCode || 502, proxyRes.headers);
+      proxyRes.pipe(res);
+    }
+  );
+
+  proxyReq.on('error', (error) => {
+    res.writeHead(502, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({
+      status: 'error',
+      message: `No se pudo conectar con la API interna: ${error.message}`,
+    }));
+  });
+
+  req.pipe(proxyReq);
+}
+
 const server = http.createServer((req, res) => {
   const requestUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = decodeURIComponent(requestUrl.pathname);
+
+  if (shouldProxyToApi(pathname)) {
+    proxyToApi(req, res);
+    return;
+  }
+
   const requestParts = pathname.split('/').filter((part) => part && part !== '..');
   let filePath = path.resolve(PUBLIC_DIR, requestParts.length === 0 ? 'index.html' : path.join(...requestParts));
 

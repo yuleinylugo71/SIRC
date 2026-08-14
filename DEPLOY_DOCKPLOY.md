@@ -104,6 +104,14 @@ Puerto interno:
 8080
 ```
 
+Variables:
+
+```env
+NODE_ENV=production
+PORT=8080
+API_INTERNAL_URL=http://sirc-api:3000
+```
+
 Rutas que deben ir a la web:
 
 ```text
@@ -120,7 +128,23 @@ Configurar el dominio:
 sirc.yuleiny.site
 ```
 
-Ruteo:
+Opcion recomendada:
+
+```text
+sirc.yuleiny.site -> sirc-web:8080
+```
+
+El servicio `sirc-web` reenvia internamente estas rutas al backend `sirc-api`:
+
+```text
+/api
+/api-docs
+/health
+```
+
+Por eso no es obligatorio crear reglas por path si Dockploy no las maneja bien.
+
+Si decides hacer ruteo por path desde Dockploy, usa:
 
 ```text
 sirc.yuleiny.site/         -> sirc-web:8080

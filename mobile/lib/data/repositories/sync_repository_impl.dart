@@ -166,7 +166,7 @@ class SyncRepositoryImpl implements SyncRepository {
         await _descargarCiudadanosServidor(token);
       }
     } on DioException catch (e) {
-      final networkError = e.response?.data?['message'] ?? 'Fallo de red en la comunicación.';
+      final networkError = _mensajeErrorDio(e, 'Fallo de red en la comunicacion.');
       for (final t in pendientes) {
         await _syncQueueDao.actualizarEstadoTarea(
           id: t.id,
@@ -233,5 +233,29 @@ class SyncRepositoryImpl implements SyncRepository {
 
       await _ciudadanoDao.guardarCiudadano(ciudadano);
     }
+  }
+
+  String _mensajeErrorDio(DioException e, String fallback) {
+    final data = e.response?.data;
+    if (data is Map) {
+      final message = data['message'];
+      if (message != null && message.toString().trim().isNotEmpty) {
+        return message.toString();
+      }
+    }
+
+    if (data is String && data.trim().isNotEmpty) {
+      final body = data.trim();
+      if (!body.startsWith('<')) {
+        return body;
+      }
+    }
+
+    final statusCode = e.response?.statusCode;
+    if (statusCode != null) {
+      return '$fallback (HTTP $statusCode)';
+    }
+
+    return fallback;
   }
 }

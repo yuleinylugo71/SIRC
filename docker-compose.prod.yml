@@ -39,6 +39,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 8080
+      API_INTERNAL_URL: http://sirc-api:3000
     expose:
       - "8080"
 
