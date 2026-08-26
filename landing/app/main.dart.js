@@ -30990,7 +30990,7 @@ q=s[1]
 s=s[2]
 p=b[2]
 return A.b([o*m+l*k+j*n,o*r+l*q+j*s,o*p[0]+l*p[1]+j*p[2]],t.n)},
-b0I(){var s="https://sirc.yuleiny.site/api"
+b0I(){var s="https://sirc.yuleiny.site"
 return s},
 aOg(){var s,r,q,p,o=null
 try{o=A.aNg()}catch(s){if(t.VI.b(A.X(s))){r=$.aIy

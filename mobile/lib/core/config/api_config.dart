@@ -20,7 +20,7 @@ class ApiConfig {
     }
 
     // Para la aplicación web y Android queremos siempre la URL pública.
-    const publicUrl = 'https://sirc.yuleiny.site/api';
+    const publicUrl = 'https://sirc.yuleiny.site';
     if (kIsWeb) {
       return publicUrl;
     }
