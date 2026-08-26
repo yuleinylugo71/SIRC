@@ -19,7 +19,6 @@ void main() async {
     ],
   );
 
-  // Inicializar demonio de sincronización automática de fondo
   final syncService = SyncService(
     procesarSincronizacionUseCase:
         container.read(procesarSincronizacionUseCaseProvider),
@@ -27,7 +26,6 @@ void main() async {
   );
   syncService.inicializar();
 
-  // Inicializar sesión antes de lanzar la interfaz (soporte para web refresh)
   await container.read(authProvider.notifier).inicializarSesion();
 
   runApp(

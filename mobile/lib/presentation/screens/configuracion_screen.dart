@@ -46,113 +46,113 @@ class ConfiguracionScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Configuración'),
-        backgroundColor: SircColors.blue,
-        foregroundColor: Colors.white,
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Sección Dispositivo
-            const Text(
-              'Dispositivo de Registro',
-              style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey),
-            ),
-            const SizedBox(height: 8),
-            Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    _ConfigRow(
-                      label: 'Código Único (UUID)',
-                      value: authEstado.dispositivoId,
-                      icon: Icons.phonelink_setup,
-                    ),
-                    const Divider(),
-                    const _ConfigRow(
-                      label: 'Estado de Licencia',
-                      value: 'Activa (Dispositivo Exclusivo)',
-                      icon: Icons.verified_user_outlined,
-                      colorValue: SircColors.blue,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Sección Usuario
-            const Text(
-              'Información de Usuario',
-              style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey),
-            ),
-            const SizedBox(height: 8),
-            Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    _ConfigRow(
-                      label: 'Usuario Activo',
-                      value: authEstado.correo,
-                      icon: Icons.person_outline,
-                    ),
-                    const Divider(),
-                    _ConfigRow(
-                      label: 'ID de Usuario',
-                      value: authEstado.usuarioId,
-                      icon: Icons.key_outlined,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
-
-            // Botón Sincronizar Cambios
-            ElevatedButton.icon(
-              onPressed: () => ref.read(syncProvider.notifier).sincronizar(),
-              icon: const Icon(Icons.sync),
-              label: const Text('Forzar Sincronización Manual'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: SircColors.blue,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Botón Cerrar Sesión
-            OutlinedButton.icon(
-              onPressed: () => _confirmarCierreSesion(context, ref),
-              icon: const Icon(Icons.exit_to_app, color: Colors.red),
-              label: const Text('Cerrar Sesión',
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 680),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Sección Dispositivo
+                const Text(
+                  'Dispositivo de Registro',
                   style: TextStyle(
-                      color: Colors.red, fontWeight: FontWeight.bold)),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                side: const BorderSide(color: Colors.red),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey),
+                ),
+                const SizedBox(height: 8),
+                Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        _ConfigRow(
+                          label: 'Código Único (UUID)',
+                          value: authEstado.dispositivoId,
+                          icon: Icons.phonelink_setup,
+                        ),
+                        const Divider(),
+                        const _ConfigRow(
+                          label: 'Estado de Licencia',
+                          value: 'Activa (Dispositivo Exclusivo)',
+                          icon: Icons.verified_user_outlined,
+                          colorValue: SircColors.blue,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Sección Usuario
+                const Text(
+                  'Información de Usuario',
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey),
+                ),
+                const SizedBox(height: 8),
+                Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        _ConfigRow(
+                          label: 'Usuario Activo',
+                          value: authEstado.correo,
+                          icon: Icons.person_outline,
+                        ),
+                        const Divider(),
+                        _ConfigRow(
+                          label: 'ID de Usuario',
+                          value: authEstado.usuarioId,
+                          icon: Icons.key_outlined,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                // Botón Sincronizar Cambios
+                ElevatedButton.icon(
+                  onPressed: () => ref.read(syncProvider.notifier).sincronizar(),
+                  icon: const Icon(Icons.sync),
+                  label: const Text('Forzar Sincronización Manual'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: SircColors.blue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Botón Cerrar Sesión
+                OutlinedButton.icon(
+                  onPressed: () => _confirmarCierreSesion(context, ref),
+                  icon: const Icon(Icons.exit_to_app, color: Colors.red),
+                  label: const Text('Cerrar Sesión',
+                      style: TextStyle(
+                          color: Colors.red, fontWeight: FontWeight.bold)),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    side: const BorderSide(color: Colors.red),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

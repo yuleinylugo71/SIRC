@@ -32,20 +32,20 @@ class SyncRepositoryImpl implements SyncRepository {
       throw Exception('Sincronización abortada: Sesión inactiva localmente.');
     }
 
-    if (pendientes.isEmpty) {
-      await _descargarCiudadanosServidor(token);
-      return;
-    }
-
-    final tareasPayload = pendientes.map((t) => {
-      'id': t.id,
-      'tablaAfectada': t.tablaAfectada,
-      'registroId': t.registroId,
-      'operacion': t.operacion,
-      'payload': t.payload,
-    }).toList();
-
     try {
+      if (pendientes.isEmpty) {
+        await _descargarCiudadanosServidor(token);
+        return;
+      }
+
+      final tareasPayload = pendientes.map((t) => {
+        'id': t.id,
+        'tablaAfectada': t.tablaAfectada,
+        'registroId': t.registroId,
+        'operacion': t.operacion,
+        'payload': t.payload,
+      }).toList();
+
       final response = await _dio.post(
         '/api/sync',
         data: {'tareas': tareasPayload},
@@ -236,6 +236,11 @@ class SyncRepositoryImpl implements SyncRepository {
   }
 
   String _mensajeErrorDio(DioException e, String fallback) {
+    final statusCode = e.response?.statusCode;
+    if (statusCode == 401) {
+      return 'Sesión expirada o no autorizada. Por favor cierra e inicia sesión nuevamente.';
+    }
+
     final data = e.response?.data;
     if (data is Map) {
       final message = data['message'];
@@ -251,7 +256,6 @@ class SyncRepositoryImpl implements SyncRepository {
       }
     }
 
-    final statusCode = e.response?.statusCode;
     if (statusCode != null) {
       return '$fallback (HTTP $statusCode)';
     }

@@ -5,7 +5,7 @@ const path = require('path');
 
 const PORT = process.env.PORT || 8080;
 const PUBLIC_DIR = path.resolve(__dirname);
-const API_INTERNAL_URL = process.env.API_INTERNAL_URL || 'http://sirc-api:3000';
+const API_INTERNAL_URL = process.env.API_INTERNAL_URL || 'http://localhost:3000';
 const API_PROXY_PATHS = ['/api', '/api-docs', '/health'];
 
 const MIME_TYPES = {
@@ -88,6 +88,7 @@ const server = http.createServer((req, res) => {
     headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, proxy-revalidate';
     headers['Pragma'] = 'no-cache';
     headers['Expires'] = '0';
+    headers['Clear-Site-Data'] = '"cache"';
   }
 
   fs.readFile(filePath, (err, content) => {
@@ -95,7 +96,13 @@ const server = http.createServer((req, res) => {
       if (err.code === 'ENOENT') {
         const appIndex = path.join(PUBLIC_DIR, 'app', 'index.html');
         if (pathname.startsWith('/app/') && fs.existsSync(appIndex)) {
-          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+          res.writeHead(200, {
+            'Content-Type': 'text/html; charset=utf-8',
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            'Clear-Site-Data': '"cache"',
+          });
           res.end(fs.readFileSync(appIndex), 'utf-8');
           return;
         }

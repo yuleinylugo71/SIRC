@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/di/providers.dart';
 import '../bloc/auth_provider.dart';
 import '../theme/sirc_theme.dart';
+import '../widgets/web_app_shell.dart';
 
 class RegistrarRegistradorScreen extends ConsumerStatefulWidget {
   const RegistrarRegistradorScreen({super.key});
@@ -82,8 +85,12 @@ class _RegistrarRegistradorScreenState
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop(); // Cerrar dialog
-                    Navigator.of(context)
-                        .pop(); // Volver a la pantalla anterior
+                    if (kIsWeb) {
+                      context.go('/agentes');
+                    } else {
+                      Navigator.of(context)
+                          .pop(); // Volver a la pantalla anterior
+                    }
                   },
                   child: const Text('Entendido',
                       style: TextStyle(fontWeight: FontWeight.bold)),
@@ -112,6 +119,33 @@ class _RegistrarRegistradorScreenState
 
   @override
   Widget build(BuildContext context) {
+    if (kIsWeb) {
+      return WebContentPage(
+        title: 'Registrar agente',
+        subtitle: 'Crea una cuenta para trabajo de campo',
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 720),
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: SircColors.border),
+              boxShadow: [
+                BoxShadow(
+                  color: SircColors.blue.withOpacity(0.06),
+                  blurRadius: 18,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: _buildFormContent(web: true),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Registrar Agente'),
@@ -120,147 +154,154 @@ class _RegistrarRegistradorScreenState
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Icono y Texto de Encabezado
-              Center(
-                child: Column(
-                  children: [
-                    const Icon(Icons.admin_panel_settings,
-                        size: 72, color: SircColors.blue),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Nuevo Registrador de Campo',
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: SircColors.blueDark),
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      'Crea una nueva cuenta para que un agente pueda recolectar datos en campo.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 13, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Campo Nombre Completo
-              TextFormField(
-                controller: _nombreController,
-                keyboardType: TextInputType.name,
-                decoration: InputDecoration(
-                  labelText: 'Nombre Completo',
-                  prefixIcon: const Icon(Icons.person_outline),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Por favor ingresa el nombre completo.';
-                  }
-                  if (value.trim().length < 3) {
-                    return 'El nombre debe tener al menos 3 caracteres.';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-
-              // Campo Correo
-              TextFormField(
-                controller: _correoController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: 'Correo Electrónico',
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Por favor ingresa el correo electrónico.';
-                  }
-                  // Validación simple de regex
-                  final emailRegex =
-                      RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                  if (!emailRegex.hasMatch(value.trim())) {
-                    return 'Ingresa un formato de correo válido.';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-
-              // Campo Contraseña
-              TextFormField(
-                controller: _contrasenaController,
-                obscureText: !_mostrarContrasena,
-                decoration: InputDecoration(
-                  labelText: 'Contraseña Temporal',
-                  prefixIcon: const Icon(Icons.lock_outlined),
-                  suffixIcon: IconButton(
-                    icon: Icon(_mostrarContrasena
-                        ? Icons.visibility
-                        : Icons.visibility_off),
-                    onPressed: () => setState(
-                        () => _mostrarContrasena = !_mostrarContrasena),
-                  ),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingresa una contraseña.';
-                  }
-                  if (value.length < 6) {
-                    return 'La contraseña debe tener al menos 6 caracteres.';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 36),
-
-              // Botón Guardar / Loader
-              ElevatedButton(
-                onPressed: _cargando ? null : _enviarFormulario,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: SircColors.blue,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  elevation: 2,
-                ),
-                child: _cargando
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 3,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text(
-                        'Registrar Agente',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-              ),
-            ],
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 680),
+            child: _buildFormContent(),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildFormContent({bool web = false}) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Icono y Texto de Encabezado
+          Center(
+            child: Column(
+              children: [
+                Icon(Icons.admin_panel_settings,
+                    size: web ? 58 : 72, color: SircColors.blue),
+                const SizedBox(height: 12),
+                Text(
+                  'Nuevo Registrador de Campo',
+                  style: TextStyle(
+                      fontSize: web ? 18 : 20,
+                      fontWeight: FontWeight.bold,
+                      color: SircColors.blueDark),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Crea una nueva cuenta para que un agente pueda recolectar datos en campo.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 13, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+
+          // Campo Nombre Completo
+          TextFormField(
+            controller: _nombreController,
+            keyboardType: TextInputType.name,
+            decoration: InputDecoration(
+              labelText: 'Nombre Completo',
+              prefixIcon: const Icon(Icons.person_outline),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(web ? 8 : 12)),
+              filled: true,
+              fillColor: Colors.grey.shade50,
+            ),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Por favor ingresa el nombre completo.';
+              }
+              if (value.trim().length < 3) {
+                return 'El nombre debe tener al menos 3 caracteres.';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 20),
+
+          // Campo Correo
+          TextFormField(
+            controller: _correoController,
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+              labelText: 'Correo Electrónico',
+              prefixIcon: const Icon(Icons.email_outlined),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(web ? 8 : 12)),
+              filled: true,
+              fillColor: Colors.grey.shade50,
+            ),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Por favor ingresa el correo electrónico.';
+              }
+              // Validación simple de regex
+              final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+              if (!emailRegex.hasMatch(value.trim())) {
+                return 'Ingresa un formato de correo válido.';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 20),
+
+          // Campo Contraseña
+          TextFormField(
+            controller: _contrasenaController,
+            obscureText: !_mostrarContrasena,
+            decoration: InputDecoration(
+              labelText: 'Contraseña Temporal',
+              prefixIcon: const Icon(Icons.lock_outlined),
+              suffixIcon: IconButton(
+                icon: Icon(_mostrarContrasena
+                    ? Icons.visibility
+                    : Icons.visibility_off),
+                onPressed: () =>
+                    setState(() => _mostrarContrasena = !_mostrarContrasena),
+              ),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(web ? 8 : 12)),
+              filled: true,
+              fillColor: Colors.grey.shade50,
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Por favor ingresa una contraseña.';
+              }
+              if (value.length < 6) {
+                return 'La contraseña debe tener al menos 6 caracteres.';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 36),
+
+          // Botón Guardar / Loader
+          ElevatedButton(
+            onPressed: _cargando ? null : _enviarFormulario,
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              backgroundColor: SircColors.blue,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(web ? 8 : 12)),
+              elevation: 2,
+            ),
+            child: _cargando
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Text(
+                    'Registrar Agente',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+          ),
+        ],
       ),
     );
   }

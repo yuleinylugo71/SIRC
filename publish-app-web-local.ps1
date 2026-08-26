@@ -8,7 +8,7 @@ Write-Host "Compilando SIRC App Web..." -ForegroundColor Cyan
 
 Push-Location $mobile
 flutter pub get
-flutter build web --release --base-href /app/ --pwa-strategy=none --dart-define=API_BASE_URL=http://localhost:3000
+flutter build web --release --base-href /app/ --pwa-strategy=none --dart-define=API_BASE_URL=http://localhost:8080
 Pop-Location
 
 if (Test-Path $target) {

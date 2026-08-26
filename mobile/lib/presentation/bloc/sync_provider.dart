@@ -37,10 +37,23 @@ class SyncNotifier extends StateNotifier<SyncState> {
             : 'Sincronizacion finalizada exitosamente.',
       );
     } catch (e) {
-      state = SyncError(
-        'Error en sincronizacion: ${e.toString().replaceAll('Exception: ', '')}',
-      );
+      state = SyncError(_mensajeErrorUsuario(e));
     }
+  }
+
+  String _mensajeErrorUsuario(Object error) {
+    final mensaje = error.toString().replaceAll('Exception: ', '');
+    if (mensaje.contains('status code of 401') ||
+        mensaje.contains('HTTP 401') ||
+        mensaje.contains('no autorizada')) {
+      return 'Sesion expirada o no autorizada. Cierra sesion e inicia nuevamente.';
+    }
+
+    if (mensaje.length > 180) {
+      return 'No se pudo sincronizar. Verifica la sesion y la conexion con el servidor.';
+    }
+
+    return 'Error en sincronizacion: $mensaje';
   }
 }
 
