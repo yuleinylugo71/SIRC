@@ -1,41 +1,33 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SIRC - Sistema de Información de Registro Ciudadano</title>
-  <meta name="description" content="Plataforma institucional de gestión y registro ciudadano. Captura segura en territorio con sincronización automática resiliente.">
-  
+  <meta name="description"
+    content="Plataforma institucional de gestión y registro ciudadano. Captura segura en territorio con sincronización automática resiliente.">
+
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
+
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
 
-  <!-- Top System Status Bar -->
-  <div class="top-bar">
-    <div class="container top-bar-inner">
-      <div class="system-status">
-        <span class="status-dot-active"></span>
-        <span>Estado del Servidor Central: <strong>Operativo (Online)</strong></span>
-      </div>
-      <div class="top-info-meta">
-        <span><i class="fa-solid fa-code-branch"></i> SIRC Core v1.0.0</span>
-        <span><i class="fa-solid fa-server"></i> API Gateway HTTP/2</span>
-      </div>
-    </div>
-  </div>
 
   <!-- Main Navigation Header -->
-  <header class="navbar">
+  <header class="navbar site-header">
     <div class="container navbar-inner">
       <a href="#" class="brand">
         <div class="brand-badge">
-          <i class="fa-solid fa-landmark-flag"></i>
+          <img src="logosinfondo.png" alt="SIRC Logo" style="width: 100%; height: 100%; object-fit: contain;">
         </div>
         <div class="brand-text">
           <span class="brand-name">SIRC</span>
@@ -77,7 +69,9 @@
           </h1>
 
           <p class="hero-description">
-            Plataforma institucional diseñada para el censo y empadronamiento de ciudadanos. Garantiza la captura continua de datos en zonas sin cobertura celular mediante almacenamiento cifrado local en SQLite y sincronización transaccional al backend PostgreSQL.
+            Plataforma institucional diseñada para el censo y empadronamiento de ciudadanos. Garantiza la captura
+            continua de datos en zonas sin cobertura celular mediante almacenamiento cifrado local en SQLite y
+            sincronización transaccional al backend PostgreSQL.
           </p>
 
           <div class="hero-ctas">
@@ -160,7 +154,8 @@
           <div class="section-subtitle">Trazabilidad End-to-End</div>
           <h2 class="section-title">Flujo Transaccional del Registro Ciudadano</h2>
           <p class="section-description">
-            Desde la captura en dispositivos móviles de brigada hasta la consolidación en el centro de cómputo institucional.
+            Desde la captura en dispositivos móviles de brigada hasta la consolidación en el centro de cómputo
+            institucional.
           </p>
         </div>
 
@@ -169,28 +164,32 @@
             <div class="flow-step-num">01</div>
             <div class="flow-icon"><i class="fa-solid fa-pen-to-square"></i></div>
             <h3>Captura Territorial</h3>
-            <p>Ingreso de datos demográficos y de identificación en la app móvil Flutter, con validación de sintaxis en tiempo real.</p>
+            <p>Ingreso de datos demográficos y de identificación en la app móvil Flutter, con validación de sintaxis en
+              tiempo real.</p>
           </div>
 
           <div class="flow-card">
             <div class="flow-step-num">02</div>
             <div class="flow-icon"><i class="fa-solid fa-hard-drive"></i></div>
             <h3>Persistencia SQLite</h3>
-            <p>Almacenamiento local cifrado de manera inmutable. Los datos quedan resguardados ante caídas o apagados del equipo.</p>
+            <p>Almacenamiento local cifrado de manera inmutable. Los datos quedan resguardados ante caídas o apagados
+              del equipo.</p>
           </div>
 
           <div class="flow-card">
             <div class="flow-step-num">03</div>
             <div class="flow-icon"><i class="fa-solid fa-tower-cell"></i></div>
             <h3>Detección de Red</h3>
-            <p>Demonio en segundo plano monitorea la disponibilidad de red (4G/WiFi) e inicia la transmisión en lotes sin interferir con el usuario.</p>
+            <p>Demonio en segundo plano monitorea la disponibilidad de red (4G/WiFi) e inicia la transmisión en lotes
+              sin interferir con el usuario.</p>
           </div>
 
           <div class="flow-card">
             <div class="flow-step-num">04</div>
             <div class="flow-icon"><i class="fa-solid fa-server"></i></div>
             <h3>Consolidación Cloud</h3>
-            <p>Backend Node.js procesa las solicitudes, ejecuta Prisma ORM y registra la entrada auditada en la base de datos PostgreSQL.</p>
+            <p>Backend Node.js procesa las solicitudes, ejecuta Prisma ORM y registra la entrada auditada en la base de
+              datos PostgreSQL.</p>
           </div>
         </div>
       </div>
@@ -203,7 +202,8 @@
           <div class="section-subtitle">Estándares Institucionales</div>
           <h2 class="section-title">Diseñado para Operaciones Críticas</h2>
           <p class="section-description">
-            SIRC cumple con las directrices de seguridad, auditoría y disponibilidad requeridas por los organismos públicos.
+            SIRC cumple con las directrices de seguridad, auditoría y disponibilidad requeridas por los organismos
+            públicos.
           </p>
         </div>
 
@@ -229,7 +229,8 @@
               <i class="fa-solid fa-arrows-rotate"></i>
             </div>
             <h3>Sincronización Delta</h3>
-            <p>Optimización del consumo de datos móviles transmitiendo únicamente los cambios incrementales de cada expediente.</p>
+            <p>Optimización del consumo de datos móviles transmitiendo únicamente los cambios incrementales de cada
+              expediente.</p>
           </div>
 
           <div class="feature-card">
@@ -237,7 +238,8 @@
               <i class="fa-solid fa-clock-rotate-left"></i>
             </div>
             <h3>Trazabilidad y Log de Auditoría</h3>
-            <p>Registro exacto de sello de tiempo, ID del operador y código único de dispositivo para cada registro creado.</p>
+            <p>Registro exacto de sello de tiempo, ID del operador y código único de dispositivo para cada registro
+              creado.</p>
           </div>
 
           <div class="feature-card">
@@ -245,7 +247,8 @@
               <i class="fa-solid fa-layer-group"></i>
             </div>
             <h3>Arquitectura Robusta</h3>
-            <p>Backend desacoplado y optimizado para la integración eficiente con las plataformas centrales de gobierno.</p>
+            <p>Backend desacoplado y optimizado para la integración eficiente con las plataformas centrales de gobierno.
+            </p>
           </div>
 
           <div class="feature-card">
@@ -253,7 +256,8 @@
               <i class="fa-solid fa-cubes-stacked"></i>
             </div>
             <h3>Multiplataforma Nativa</h3>
-            <p>Cliente compilado para Android y versión Web progresiva para consulta e inspección desde oficinas centrales.</p>
+            <p>Cliente compilado para Android y versión Web progresiva para consulta e inspección desde oficinas
+              centrales.</p>
           </div>
         </div>
       </div>
@@ -266,7 +270,8 @@
           <div class="section-subtitle">Simulador Interactivo de Sincronización</div>
           <h2 class="section-title">Centro de Mando y Pruebas en Tiempo Real</h2>
           <p class="section-description">
-            Simula el comportamiento del motor de sincronización. Alterna el estado de la red para probar la captura local offline y la posterior carga al servidor central.
+            Simula el comportamiento del motor de sincronización. Alterna el estado de la red para probar la captura
+            local offline y la posterior carga al servidor central.
           </p>
         </div>
 
@@ -379,7 +384,8 @@
                       <tbody id="cloud-records-body"></tbody>
                     </table>
                     <div id="cloud-empty" class="empty-state">
-                      <i class="fa-solid fa-cloud-arrow-up"></i> El servidor central aún no ha recibido registros sincronizados.
+                      <i class="fa-solid fa-cloud-arrow-up"></i> El servidor central aún no ha recibido registros
+                      sincronizados.
                     </div>
                   </div>
                 </div>
@@ -406,7 +412,8 @@
         <div class="cta-banner">
           <h2>Despliegue y Descarga de Componentes</h2>
           <p>
-            Obtén el ejecutable APK para la brigada de campo o accede al panel de administración central desde cualquier explorador web.
+            Obtén el ejecutable APK para la brigada de campo o accede al panel de administración central desde cualquier
+            explorador web.
           </p>
           <div class="cta-buttons-group">
             <a href="downloads/sirc-app-v1.0.apk" download class="btn btn-primary btn-large">
@@ -428,7 +435,7 @@
         <div class="footer-col">
           <div class="brand" style="margin-bottom: 1rem;">
             <div class="brand-badge">
-              <i class="fa-solid fa-landmark-flag"></i>
+              <img src="logosinfondo.png" alt="SIRC Logo" style="width: 100%; height: 100%; object-fit: contain;">
             </div>
             <div class="brand-text">
               <span class="brand-name">SIRC</span>
@@ -436,7 +443,8 @@
             </div>
           </div>
           <p style="color: var(--text-secondary); font-size: 0.875rem; max-width: 320px;">
-            Sistema de Información de Registro Ciudadano para la captura segura, resiliente y auditada de datos demográficos en territorio nacional.
+            Sistema de Información de Registro Ciudadano para la captura segura, resiliente y auditada de datos
+            demográficos en territorio nacional.
           </p>
         </div>
 
@@ -476,4 +484,5 @@
 
   <script src="app.js"></script>
 </body>
+
 </html>

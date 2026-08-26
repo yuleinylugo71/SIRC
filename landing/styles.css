@@ -5,20 +5,20 @@
    ========================================================================== */
 
 :root {
-  /* Light Theme & Pastel Blue Palette from App (SircTheme) */
+  /* Light Theme & Vibrant Indigo Palette */
   --bg-main: #f8fafc;
   --bg-surface: #ffffff;
-  --bg-sky: #eff6ff;
-  /* Pastel Blue Tint */
-  --bg-sky-light: #f4f8ff;
+  --bg-sky: #f1f5f9;
+  /* Very subtle slate tint */
+  --bg-sky-light: #f8fafc;
   /* Soft Sky Light */
-  --bg-sky-badge: #e0f2fe;
+  --bg-sky-badge: #e2e8f0;
   /* Sky Badge */
   --bg-card-hover: #f1f5f9;
 
   --border-light: #e2e8f0;
   --border-strong: #cbd5e1;
-  --border-blue: #bfdbfe;
+  --border-blue: #c7d2fe;
 
   --text-primary: #0f172a;
   /* Deep Ink */
@@ -28,15 +28,15 @@
   /* Muted */
   --text-inverse: #ffffff;
 
-  --blue-primary: #2563eb;
-  /* App Royal Blue */
-  --blue-dark: #1d4ed8;
-  /* Deep Blue */
-  --blue-light: #60a5fa;
-  /* Light Blue */
-  --blue-accent: #3b82f6;
-  --blue-pastel: #dbeafe;
-  /* Pastel Blue Accent */
+  --blue-primary: #4f46e5;
+  /* Vibrant Indigo */
+  --blue-dark: #3730a3;
+  /* Deep Indigo */
+  --blue-light: #818cf8;
+  /* Light Indigo */
+  --blue-accent: #6366f1;
+  --blue-pastel: #e0e7ff;
+  /* Subtle Indigo Accent */
 
   --emerald-main: #10b981;
   --emerald-bg: #d1fae5;
@@ -73,10 +73,9 @@
   --transition-base: 0.28s var(--ease-standard);
   --transition-page: 0.4s var(--ease-out-soft);
 
-  /* Altura real del header (top-bar + navbar). Se usa para compensar el
-     contenido y para el scroll-padding, así los anclajes internos no
-     quedan tapados por el header fijo. Ajusta si cambian los paddings. */
-  --header-height: 88px;
+  /* Altura real del navbar. Se usa para compensar el
+     contenido y para el scroll-padding. */
+  --header-height: 72px;
 }
 
 /* Reset & Global Base */
@@ -151,61 +150,7 @@ body>.hero {
   padding-top: var(--header-height);
 }
 
-/* Top System Status Bar */
-.top-bar {
-  background: var(--bg-sky);
-  border-bottom: 1px solid var(--border-blue);
-  padding: 0.5rem 0;
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
-}
 
-.top-bar-inner {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.system-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 500;
-}
-
-.status-dot-active {
-  width: 8px;
-  height: 8px;
-  background-color: var(--emerald-main);
-  border-radius: 50%;
-  box-shadow: 0 0 8px var(--emerald-main);
-  animation: pulse-dot 2.2s ease-in-out infinite;
-}
-
-@keyframes pulse-dot {
-
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45);
-  }
-
-  50% {
-    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0);
-  }
-}
-
-.top-info-meta {
-  display: flex;
-  gap: 1.5rem;
-}
-
-.top-info-meta span {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-/* Header & Navigation */
 .navbar {
   /* Ya no depende de "sticky": el contenedor padre .site-header
      es el que está fijo. Esto evita que el navbar "desaparezca"
@@ -241,16 +186,16 @@ body>.hero {
 }
 
 .brand-badge {
-  width: 40px;
-  height: 40px;
-  background: var(--blue-primary);
-  color: #fff;
+  width: 48px;
+  height: 48px;
+  background: transparent;
+  color: var(--blue-primary);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.25rem;
-  box-shadow: var(--shadow-blue-button);
+  box-shadow: none;
   transition: transform var(--transition-fast);
 }
 
@@ -574,6 +519,13 @@ body>.hero {
   border-radius: var(--radius-xl);
   overflow: hidden;
   box-shadow: var(--shadow-lg);
+  transition: transform 0.4s var(--ease-out-soft), box-shadow 0.4s var(--ease-out-soft);
+  cursor: pointer;
+}
+
+.hero-mockup-frame:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 30px 50px -12px rgba(79, 70, 229, 0.2);
 }
 
 .mockup-header-bar {
@@ -907,6 +859,7 @@ body>.hero {
 .network-controls-wrapper {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 1rem;
 }
 
@@ -1067,6 +1020,12 @@ input:checked+.slider:before {
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border-light);
   padding: 0 1rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+  
+.db-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .db-tab {
@@ -1081,6 +1040,8 @@ input:checked+.slider:before {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-shrink: 0;
+  white-space: nowrap;
   transition: color var(--transition-fast), border-color var(--transition-fast);
 }
 
@@ -1241,7 +1202,7 @@ tr:hover td {
 
 /* Download & Call to Action Banner */
 .cta-banner {
-  background: linear-gradient(135deg, var(--bg-sky) 0%, #dbeafe 100%);
+  background: linear-gradient(135deg, var(--bg-sky) 0%, var(--blue-pastel) 100%);
   border: 1px solid var(--border-blue);
   border-radius: var(--radius-xl);
   padding: 4rem 2rem;
@@ -1340,6 +1301,7 @@ tr:hover td {
 
   .sim-grid-layout {
     grid-template-columns: 1fr;
+    min-height: auto;
   }
 
   .sim-form-pane {
@@ -1354,26 +1316,62 @@ tr:hover td {
 
 @media (max-width: 640px) {
   :root {
-    /* En móvil el top-bar suele ocultarse o apilarse distinto;
-       ajusta este valor según tu navbar móvil real */
-    --header-height: 64px;
+    --header-height: 72px;
   }
 
   .hero-title {
-    font-size: 2.25rem;
+    font-size: 2rem;
   }
 
   .nav-links {
     display: none;
   }
 
+  .nav-actions .btn-secondary {
+    display: none;
+  }
+
+  .nav-actions .btn-primary {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+  
+  .brand-name {
+    font-size: 1.1rem;
+  }
+  
+  .brand-badge {
+    width: 36px;
+    height: 36px;
+  }
+
   .flow-grid,
   .features-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-row {
     grid-template-columns: 1fr;
   }
 
   .metrics-strip {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .sim-top-toolbar {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .mockup-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .cta-buttons-group {
+    flex-direction: column;
+    width: 100%;
   }
 
   .footer-grid {
