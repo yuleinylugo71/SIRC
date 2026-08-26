@@ -53,136 +53,446 @@ class DashboardScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      body: SircBackground(
-        child: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final contentWidth =
-                  constraints.maxWidth > 680 ? 680.0 : constraints.maxWidth;
-
-              return Align(
-                alignment: Alignment.topCenter,
-                child: SizedBox(
-                  width: contentWidth,
-                  child: ScrollConfiguration(
-                    behavior: ScrollConfiguration.of(context)
-                        .copyWith(scrollbars: false),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _AppHeader(
-                            onSettings: () => context.push('/configuracion'),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                const Text(
-                                  'Sistema de Informacion y Registro de Ciudadanos',
-                                  style: TextStyle(
-                                    color: SircColors.ink,
-                                    fontSize: 26,
-                                    fontWeight: FontWeight.w900,
-                                    height: 1.1,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                const Text(
-                                  'Gestion local y sincronizacion',
-                                  style: TextStyle(
-                                    color: SircColors.muted,
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: StreamBuilder<int>(
-                                        stream:
-                                            db.ciudadanoDao.contarCiudadanos(
-                                          usuarioId: authEstado.usuarioId,
-                                          rol: authEstado.rol,
-                                        ),
-                                        builder: (context, snapshot) {
-                                          return _StatTile(
-                                            icon: Icons.people_alt_rounded,
-                                            value: '${snapshot.data ?? 0}',
-                                            label: 'Ciudadanos',
-                                            tint: const Color(0xFFEAF4FF),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: StreamBuilder<int>(
-                                        stream: db.syncQueueDao
-                                            .contarTareasPendientes(),
-                                        builder: (context, snapshot) {
-                                          return _StatTile(
-                                            icon: Icons.cloud_upload_rounded,
-                                            value: '${snapshot.data ?? 0}',
-                                            label: 'Pendientes',
-                                            tint: const Color(0xFFE9F7FF),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 14),
-                                _SyncButton(syncEstado: syncEstado),
-                                const SizedBox(height: 20),
-                                Row(
-                                  children: const [
-                                    Text(
-                                      'Acciones rapidas',
-                                      style: TextStyle(
-                                        color: SircColors.ink,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w900,
-                                      ),
-                                    ),
-                                    Spacer(),
-                                    Icon(
-                                      Icons.touch_app_rounded,
-                                      color: SircColors.blue,
-                                      size: 18,
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                _ActionGrid(
-                                  isAdmin: isAdmin,
-                                  onCitizens: () => context.push('/ciudadanos'),
-                                  onRegisterCitizen: () =>
-                                      context.push('/ciudadano-form'),
-                                  onRegisterAgent: () =>
-                                      context.push('/registrar-registrador'),
-                                  onAgents: () => context.push('/agentes'),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
+      backgroundColor: const Color(0xFFEAF4FF),
+      body: Stack(
+        children: [
+          const Positioned.fill(child: ColoredBox(color: Color(0xFFEAF4FF))),
+          Positioned(
+            left: 16,
+            right: 16,
+            top: MediaQuery.of(context).padding.top + 18,
+            bottom: 18,
+            child: _MobileDashboardHome(
+              isAdmin: isAdmin,
+              rol: authEstado.rol,
+              ciudadanosStream: db.ciudadanoDao.contarCiudadanos(
+                usuarioId: authEstado.usuarioId,
+                rol: authEstado.rol,
+              ),
+              pendientesStream: db.syncQueueDao.contarTareasPendientes(),
+              onCitizens: () => context.push('/ciudadanos'),
+              onRegisterCitizen: () => context.push('/ciudadano-form'),
+              onRegisterAgent: () => context.push('/registrar-registrador'),
+              onAgents: () => context.push('/agentes'),
+              onSettings: () => context.push('/configuracion'),
+            ),
           ),
-        ),
+        ],
       ),
       bottomNavigationBar: _BottomNav(
         isAdmin: isAdmin,
         onCitizens: () => context.push('/ciudadanos'),
         onAgents: isAdmin ? () => context.push('/agentes') : null,
         onMore: () => context.push('/configuracion'),
+      ),
+    );
+  }
+}
+
+class _MobileDashboardHome extends StatelessWidget {
+  final bool isAdmin;
+  final String rol;
+  final Stream<int> ciudadanosStream;
+  final Stream<int> pendientesStream;
+  final VoidCallback onCitizens;
+  final VoidCallback onRegisterCitizen;
+  final VoidCallback onRegisterAgent;
+  final VoidCallback onAgents;
+  final VoidCallback onSettings;
+
+  const _MobileDashboardHome({
+    required this.isAdmin,
+    required this.rol,
+    required this.ciudadanosStream,
+    required this.pendientesStream,
+    required this.onCitizens,
+    required this.onRegisterCitizen,
+    required this.onRegisterAgent,
+    required this.onAgents,
+    required this.onSettings,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFD7E7FF)),
+                  ),
+                  child: const Icon(
+                    Icons.how_to_reg_rounded,
+                    color: SircColors.blue,
+                    size: 30,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'SIRC',
+                        style: TextStyle(
+                          color: SircColors.blue,
+                          fontSize: 28,
+                          fontWeight: FontWeight.w900,
+                          height: 1,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Registro Ciudadano',
+                        style: TextStyle(
+                          color: SircColors.inkLight,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: onSettings,
+                  icon: const Icon(Icons.settings_rounded),
+                  color: SircColors.inkLight,
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2563EB),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2563EB).withOpacity(0.18),
+                    blurRadius: 22,
+                    offset: const Offset(0, 12),
+                  ),
+                ],
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Panel de inicio',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      height: 1.05,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Resumen local y accesos rapidos del sistema.',
+                    style: TextStyle(
+                      color: Color(0xFFEAF4FF),
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: StreamBuilder<int>(
+                    stream: ciudadanosStream,
+                    builder: (context, snapshot) => _MobileSummaryCard(
+                      icon: Icons.groups_rounded,
+                      value: snapshot.hasError ? '--' : '${snapshot.data ?? 0}',
+                      label: 'Ciudadanos',
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: StreamBuilder<int>(
+                    stream: pendientesStream,
+                    builder: (context, snapshot) => _MobileSummaryCard(
+                      icon: Icons.cloud_upload_rounded,
+                      value: snapshot.hasError ? '--' : '${snapshot.data ?? 0}',
+                      label: 'Pendientes',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _MobileSummaryCard(
+              icon: Icons.verified_user_rounded,
+              value: rol,
+              label: 'Rol activo',
+              wide: true,
+            ),
+            const SizedBox(height: 22),
+            const Text(
+              'Acciones rapidas',
+              style: TextStyle(
+                color: SircColors.ink,
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _MobileQuickAction(
+              icon: Icons.groups_rounded,
+              title: 'Ciudadanos',
+              subtitle: 'Consultar registros guardados',
+              onTap: onCitizens,
+            ),
+            _MobileQuickAction(
+              icon: Icons.person_add_alt_1_rounded,
+              title: 'Registrar ciudadano',
+              subtitle: 'Capturar nueva informacion',
+              onTap: onRegisterCitizen,
+            ),
+            if (isAdmin)
+              _MobileQuickAction(
+                icon: Icons.admin_panel_settings_rounded,
+                title: 'Registrar agente',
+                subtitle: 'Crear cuenta de trabajo de campo',
+                onTap: onRegisterAgent,
+              ),
+            if (isAdmin)
+              _MobileQuickAction(
+                icon: Icons.badge_rounded,
+                title: 'Agentes',
+                subtitle: 'Administrar registradores',
+                onTap: onAgents,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MobileSummaryCard extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final String label;
+  final bool wide;
+
+  const _MobileSummaryCard({
+    required this.icon,
+    required this.value,
+    required this.label,
+    this.wide = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: wide ? double.infinity : null,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFD7E7FF)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: const Color(0xFFEAF4FF),
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: Icon(icon, color: SircColors.blue, size: 22),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: SircColors.ink,
+                    fontSize: 21,
+                    fontWeight: FontWeight.w900,
+                    height: 1,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: SircColors.muted,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MobileQuickAction extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _MobileQuickAction({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(18),
+          child: Container(
+            padding: const EdgeInsets.all(15),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: const Color(0xFFD7E7FF)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEAF4FF),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(icon, color: SircColors.blue, size: 23),
+                ),
+                const SizedBox(width: 13),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: SircColors.ink,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                          color: SircColors.muted,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: SircColors.muted,
+                  size: 15,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MobileInfoCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  const _MobileInfoCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: SircColors.border),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: SircColors.sky,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: SircColors.blue, size: 24),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: SircColors.ink,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      color: SircColors.muted,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -343,6 +653,144 @@ class _WebDashboard extends ConsumerWidget {
                 onAgents: () => context.go('/agentes'),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MobileDashboardHeader extends StatelessWidget {
+  final VoidCallback onSettings;
+
+  const _MobileDashboardHeader({required this.onSettings});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 54,
+          height: 54,
+          decoration: BoxDecoration(
+            color: SircColors.sky,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: SircColors.border),
+          ),
+          child: const Icon(
+            Icons.how_to_reg_rounded,
+            color: SircColors.blue,
+            size: 30,
+          ),
+        ),
+        const SizedBox(width: 12),
+        const Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'SIRC',
+                style: TextStyle(
+                  color: SircColors.blue,
+                  fontSize: 25,
+                  fontWeight: FontWeight.w900,
+                  height: 1,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                'Registro Ciudadano',
+                style: TextStyle(
+                  color: SircColors.muted,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+        IconButton(
+          onPressed: onSettings,
+          icon: const Icon(Icons.more_vert_rounded),
+          color: SircColors.inkLight,
+        ),
+      ],
+    );
+  }
+}
+
+class _MobileActionButton extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _MobileActionButton({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(18),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: SircColors.border),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: SircColors.sky,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(icon, color: SircColors.blue, size: 24),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: SircColors.ink,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                          color: SircColors.muted,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: SircColors.muted,
+                  size: 16,
+                ),
+              ],
+            ),
           ),
         ),
       ),

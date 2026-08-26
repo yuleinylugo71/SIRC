@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -10,6 +11,7 @@ import '../../presentation/screens/ciudadanos_list_screen.dart';
 import '../../presentation/screens/configuracion_screen.dart';
 import '../../presentation/screens/dashboard_screen.dart';
 import '../../presentation/screens/login_screen.dart';
+import '../../presentation/screens/mobile_dashboard_screen.dart';
 import '../../presentation/screens/registrar_registrador_screen.dart';
 import '../../presentation/screens/splash_screen.dart';
 import '../../presentation/widgets/web_app_shell.dart';
@@ -55,8 +57,10 @@ final GoRouter appRouter = GoRouter(
       routes: [
         GoRoute(
           path: '/dashboard',
-          pageBuilder: (context, state) =>
-              _noTransitionPage(const DashboardScreen(), key: state.pageKey),
+          pageBuilder: (context, state) => _noTransitionPage(
+            kIsWeb ? const DashboardScreen() : const MobileDashboardScreen(),
+            key: state.pageKey,
+          ),
         ),
         GoRoute(
           path: '/ciudadanos',
