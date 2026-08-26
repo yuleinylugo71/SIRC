@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/di/providers.dart';
 import '../../domain/usecases/login_usecase.dart';
@@ -39,13 +40,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> inicializarSesion() async {
     final prefs = _ref.read(sharedPreferencesProvider);
+
+    if (kIsWeb) {
+      await logout();
+      return;
+    }
+
     final token = prefs.getString('auth_token');
     final usuarioId = prefs.getString('auth_usuario_id');
     final correo = prefs.getString('auth_usuario_correo');
     final dispositivoId = prefs.getString('auth_dispositivo_id');
     final rol = prefs.getString('auth_usuario_rol') ?? 'REGISTRADOR';
 
-    if (token != null && usuarioId != null && correo != null && dispositivoId != null) {
+    if (token != null &&
+        usuarioId != null &&
+        correo != null &&
+        dispositivoId != null) {
       state = AuthAuthenticated(
         token: token,
         usuarioId: usuarioId,
@@ -61,15 +71,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> login(String correo, String contrasena) async {
     state = AuthLoading();
     try {
-      final respuesta = await _loginUseCase.ejecutar(correo: correo, contrasena: contrasena);
-      
+      final respuesta =
+          await _loginUseCase.ejecutar(correo: correo, contrasena: contrasena);
+
       final prefs = _ref.read(sharedPreferencesProvider);
       var token = prefs.getString('auth_token');
       if (token == null) {
         token = 'offline-token';
         await prefs.setString('auth_token', token);
       }
-      final dispositivoId = _ref.read(dispositivoInfoProvider).obtenerDeviceUuid();
+      final dispositivoId =
+          _ref.read(dispositivoInfoProvider).obtenerDeviceUuid();
 
       await prefs.setString('auth_usuario_id', respuesta.id);
       await prefs.setString('auth_usuario_correo', respuesta.correo);

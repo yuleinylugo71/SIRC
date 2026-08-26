@@ -100414,20 +100414,7 @@ A.hz.prototype={}
 A.BN.prototype={}
 A.BL.prototype={}
 A.mK.prototype={
-E4(){var s=0,r=A.C(t.H),q=this,p,o,n,m,l,k,j
-var $async$E4=A.D(function(a,b){if(a===1)return A.z(b,r)
-for(;;)switch(s){case 0:p=q.w.bf(0,$.w5(),t.cZ).a
-o=J.aw(p)
-n=A.bO(o.i(p,"auth_token"))
-m=A.bO(o.i(p,"auth_usuario_id"))
-l=A.bO(o.i(p,"auth_usuario_correo"))
-k=A.bO(o.i(p,"auth_dispositivo_id"))
-j=A.bO(o.i(p,"auth_usuario_rol"))
-if(j==null)j="REGISTRADOR"
-if(n!=null&&m!=null&&l!=null&&k!=null)q.sfj(0,new A.hz(n,m,l,k,j))
-else q.sfj(0,new A.BN())
-return A.A(null,r)}})
-return A.B($async$E4,r)},
+E4(){return this.og()},
 mP(a,b){return this.aAX(a,b)},
 aAX(a,b){var s=0,r=A.C(t.H),q=1,p=[],o=this,n,m,l,k,j,i,h,g
 var $async$mP=A.D(function(c,d){if(c===1){p.push(d)
