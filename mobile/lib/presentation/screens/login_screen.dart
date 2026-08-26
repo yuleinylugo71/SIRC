@@ -16,8 +16,8 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _correoController = TextEditingController(text: 'admin@sirc.gov');
-  final _contrasenaController = TextEditingController(text: 'admin12345');
+  final _correoController = TextEditingController();
+  final _contrasenaController = TextEditingController();
   bool _ocultarContrasena = true;
 
   @override

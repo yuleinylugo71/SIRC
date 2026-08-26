@@ -28,7 +28,7 @@ class ApiConfig {
       return publicUrl;
     }
 
-    // Fallback para entornos de desarrollo local.
+    // Fallback for local development environments.
     return 'http://localhost:3000';
   }
 }
