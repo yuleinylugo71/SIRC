@@ -64,17 +64,17 @@ class DashboardScreen extends ConsumerWidget {
                 alignment: Alignment.topCenter,
                 child: SizedBox(
                   width: contentWidth,
-                  height: constraints.maxHeight,
-                  child: Column(
-                    children: [
-                      _AppHeader(
-                        onSettings: () => context.push('/configuracion'),
-                      ),
-                      Expanded(
-                        child: ScrollConfiguration(
-                          behavior: ScrollConfiguration.of(context)
-                              .copyWith(scrollbars: false),
-                          child: SingleChildScrollView(
+                  child: ScrollConfiguration(
+                    behavior: ScrollConfiguration.of(context)
+                        .copyWith(scrollbars: false),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _AppHeader(
+                            onSettings: () => context.push('/configuracion'),
+                          ),
+                          Padding(
                             padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -168,9 +168,9 @@ class DashboardScreen extends ConsumerWidget {
                               ],
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               );
