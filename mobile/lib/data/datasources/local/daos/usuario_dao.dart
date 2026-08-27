@@ -24,4 +24,13 @@ class UsuarioDao extends DatabaseAccessor<AppDatabase> with _$UsuarioDaoMixin {
     return (update(usuarios)..where((t) => t.id.equals(id)))
         .write(UsuariosCompanion(deletedAt: Value(DateTime.now())));
   }
+
+  Future<void> actualizarContrasena(String id, String hashContrasena) {
+    return (update(usuarios)..where((t) => t.id.equals(id))).write(
+      UsuariosCompanion(
+        contrasena: Value(hashContrasena),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
 }

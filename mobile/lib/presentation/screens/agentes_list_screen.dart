@@ -20,6 +20,174 @@ class _AgentesListScreenState extends ConsumerState<AgentesListScreen> {
   String? _error;
   List<Usuario> _agentes = [];
 
+  String _formatearId(String id) {
+    if (id.length <= 6) return id;
+    return '${id.substring(0, 6)}...';
+  }
+
+  void _mostrarMensaje(String mensaje, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensaje),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  Future<void> _mostrarDialogoEditarAgente(Usuario agente) async {
+    final nombreController = TextEditingController(text: agente.nombre ?? '');
+    final correoController = TextEditingController(text: agente.correo);
+    final formKey = GlobalKey<FormState>();
+    var rol = agente.rol.trim().toUpperCase() == 'ADMIN'
+        ? 'ADMIN'
+        : 'REGISTRADOR';
+    var guardando = false;
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Editar agente'),
+              content: Form(
+                key: formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextFormField(
+                        controller: nombreController,
+                        decoration: const InputDecoration(
+                          labelText: 'Nombre',
+                          prefixIcon: Icon(Icons.person_outline),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().length < 3) {
+                            return 'Ingresa un nombre valido';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: correoController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: const InputDecoration(
+                          labelText: 'Correo',
+                          prefixIcon: Icon(Icons.email_outlined),
+                        ),
+                        validator: (value) {
+                          final text = value?.trim() ?? '';
+                          final emailRegex =
+                              RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                          if (!emailRegex.hasMatch(text)) {
+                            return 'Ingresa un correo valido';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<String>(
+                        value: rol,
+                        decoration: const InputDecoration(
+                          labelText: 'Rol',
+                          prefixIcon: Icon(Icons.admin_panel_settings_outlined),
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'REGISTRADOR',
+                            child: Text('REGISTRADOR'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'ADMIN',
+                            child: Text('ADMIN'),
+                          ),
+                        ],
+                        onChanged: guardando
+                            ? null
+                            : (value) {
+                                if (value != null) {
+                                  setDialogState(() => rol = value);
+                                }
+                              },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed:
+                      guardando ? null : () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancelar'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: guardando
+                      ? null
+                      : () async {
+                          if (!(formKey.currentState?.validate() ?? false)) {
+                            return;
+                          }
+
+                          final authEstado = ref.read(authProvider);
+                          if (authEstado is! AuthAuthenticated) {
+                            _mostrarMensaje(
+                              'Sesion no activa',
+                              SircColors.error,
+                            );
+                            return;
+                          }
+
+                          setDialogState(() => guardando = true);
+                          try {
+                            await ref
+                                .read(usuarioRepositoryProvider)
+                                .actualizarUsuario(
+                                  id: agente.id,
+                                  correo: correoController.text.trim(),
+                                  nombre: nombreController.text.trim(),
+                                  rol: rol,
+                                  token: authEstado.token,
+                                );
+
+                            if (!mounted) return;
+                            Navigator.of(dialogContext).pop();
+                            _mostrarMensaje(
+                              'Agente actualizado correctamente.',
+                              SircColors.success,
+                            );
+                            await _cargarAgentes();
+                          } catch (e) {
+                            if (!mounted) return;
+                            setDialogState(() => guardando = false);
+                            _mostrarMensaje(
+                              e.toString().replaceAll('Exception: ', ''),
+                              SircColors.error,
+                            );
+                          }
+                        },
+                  icon: guardando
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.save_rounded),
+                  label: Text(guardando ? 'Guardando' : 'Guardar'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    nombreController.dispose();
+    correoController.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -268,13 +436,26 @@ class _AgentesListScreenState extends ConsumerState<AgentesListScreen> {
                         ],
                       ),
                     ),
-                    Text(
-                      'ID: ${agente.id.substring(0, 6)}...',
-                      style: const TextStyle(
-                        color: SircColors.muted,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'ID: ${_formatearId(agente.id)}',
+                          style: const TextStyle(
+                            color: SircColors.muted,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        IconButton(
+                          onPressed: () => _mostrarDialogoEditarAgente(agente),
+                          icon: const Icon(Icons.edit_rounded),
+                          tooltip: 'Editar agente',
+                          color: SircColors.blue,
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -383,9 +564,11 @@ class _AgentesListScreenState extends ConsumerState<AgentesListScreen> {
                       ),
                     ],
                   ),
-                  trailing: Text(
-                    'ID: ${agente.id.substring(0, 6)}...',
-                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                  trailing: IconButton(
+                    onPressed: () => _mostrarDialogoEditarAgente(agente),
+                    icon: const Icon(Icons.edit_rounded),
+                    tooltip: 'Editar agente',
+                    color: SircColors.blue,
                   ),
                 ),
               );

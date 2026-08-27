@@ -58,6 +58,7 @@ class SyncRepositoryImpl implements SyncRepository {
 
       if (response.statusCode == 200) {
         final resultados = response.data['data'] as List<dynamic>;
+        final erroresParciales = <String>[];
 
         for (final res in resultados) {
           final tareaId = res['id'] as String;
@@ -70,9 +71,6 @@ class SyncRepositoryImpl implements SyncRepository {
           final tareaLocal = pendientes.firstWhere((t) => t.id == tareaId);
 
           if (success) {
-            // Eliminar tarea de la cola SQLite local
-            await _syncQueueDao.eliminarTarea(tareaId);
-
             if (tareaLocal.tablaAfectada == 'ciudadanos') {
               final payloadJson = jsonDecode(tareaLocal.payload);
               final ciudadanoIdLocal = tareaLocal.registroId;
@@ -80,19 +78,6 @@ class SyncRepositoryImpl implements SyncRepository {
               if (tareaLocal.operacion != 'DELETE') {
                 if (unificadoId != null && datosServidor != null) {
                   // A. RESOLUCIÓN DE COLISIÓN DE DOCUMENTO (REMAPEO DE ID GANADOR):
-                  // 1. Eliminar el registro provisional local viejo
-                  final ciudadanoAnterior =
-                      await _ciudadanoDao.obtenerCiudadanoPorId(ciudadanoIdLocal);
-                  if (ciudadanoAnterior != null) {
-                    await _ciudadanoDao.registrarVersionAnterior(
-                      ciudadanoAnterior,
-                      historialId: _uuid.v4(),
-                      motivo: 'Antes de unificar por sincronizacion',
-                    );
-                  }
-                  await _ciudadanoDao.eliminarCiudadanoLogico(ciudadanoIdLocal); 
-                  
-                  // 2. Insertar/Actualizar el registro unificado bajo el UUID ganador del servidor
                   final ciudadanoUnificado = CiudadanoLocal(
                     id: unificadoId,
                     documentoIdentidad: datosServidor['documento_identidad'] as String,
@@ -109,20 +94,17 @@ class SyncRepositoryImpl implements SyncRepository {
                     createdAt: DateTime.parse(payloadJson['created_at'] as String? ?? DateTime.now().toIso8601String()),
                     updatedAt: DateTime.now(),
                   );
-                  
-                  await _ciudadanoDao.guardarCiudadano(ciudadanoUnificado);
+                  await _ciudadanoDao.guardarCiudadanoResolviendoDocumento(
+                    ciudadano: ciudadanoUnificado,
+                    historialIdAnterior: _uuid.v4(),
+                    historialIdDuplicado: _uuid.v4(),
+                    motivoHistorial: 'Antes de unificar por sincronizacion',
+                  );
                 } else if (conflicto && datosServidor != null) {
                   // B. RESOLUCIÓN DE CONFLICTO LWW (EL SERVIDOR FUSIONÓ CAMPOS):
                   // Sobrescribimos el ciudadano local existente con los datos finales
                   final ciudadanoAnterior =
                       await _ciudadanoDao.obtenerCiudadanoPorId(ciudadanoIdLocal);
-                  if (ciudadanoAnterior != null) {
-                    await _ciudadanoDao.registrarVersionAnterior(
-                      ciudadanoAnterior,
-                      historialId: _uuid.v4(),
-                      motivo: 'Antes de resolver conflicto de sincronizacion',
-                    );
-                  }
                   final ciudadanoConflicto = CiudadanoLocal(
                     id: ciudadanoIdLocal,
                     documentoIdentidad: datosServidor['documento_identidad'] as String,
@@ -140,7 +122,14 @@ class SyncRepositoryImpl implements SyncRepository {
                     updatedAt: DateTime.now(),
                   );
 
-                  await _ciudadanoDao.guardarCiudadano(ciudadanoConflicto);
+                  await _ciudadanoDao.guardarCiudadanoResolviendoDocumento(
+                    ciudadano: ciudadanoConflicto,
+                    ciudadanoAnterior: ciudadanoAnterior,
+                    historialIdAnterior: _uuid.v4(),
+                    historialIdDuplicado: _uuid.v4(),
+                    motivoAnterior: 'Antes de resolver conflicto de sincronizacion',
+                    motivoHistorial: 'Antes de unificar duplicado local por documento',
+                  );
                 } else {
                   // C. FLUJO EXITOSO ESTÁNDAR: Actualizamos estado local
                   final versionSincronizada = payloadJson['version'] as int? ?? 1;
@@ -152,8 +141,11 @@ class SyncRepositoryImpl implements SyncRepository {
                 }
               }
             }
+
+            await _syncQueueDao.eliminarTarea(tareaId);
           } else {
             // Error parcial
+            erroresParciales.add(errorMsg ?? 'Fallo en validacion de servidor.');
             await _syncQueueDao.actualizarEstadoTarea(
               id: tareaId,
               estado: 'ERROR',
@@ -164,6 +156,10 @@ class SyncRepositoryImpl implements SyncRepository {
         }
 
         await _descargarCiudadanosServidor(token);
+
+        if (erroresParciales.isNotEmpty) {
+          throw Exception(erroresParciales.first);
+        }
       }
     } on DioException catch (e) {
       final networkError = _mensajeErrorDio(e, 'Fallo de red en la comunicacion.');
@@ -231,7 +227,12 @@ class SyncRepositoryImpl implements SyncRepository {
         ),
       );
 
-      await _ciudadanoDao.guardarCiudadano(ciudadano);
+      await _ciudadanoDao.guardarCiudadanoResolviendoDocumento(
+        ciudadano: ciudadano,
+        historialIdAnterior: _uuid.v4(),
+        historialIdDuplicado: _uuid.v4(),
+        motivoHistorial: 'Antes de unificar descarga del servidor',
+      );
     }
   }
 

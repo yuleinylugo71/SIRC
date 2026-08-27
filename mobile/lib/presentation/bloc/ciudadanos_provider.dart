@@ -125,7 +125,7 @@ class CiudadanosNotifier extends StateNotifier<CiudadanosEstado> {
       );
       cargarCiudadanos();
     } catch (e) {
-      state = CiudadanosError('Error al escribir localmente: ${e.toString()}');
+      state = CiudadanosError(_mensajeErrorEscritura(e));
     }
   }
 
@@ -137,6 +137,17 @@ class CiudadanosNotifier extends StateNotifier<CiudadanosEstado> {
     } catch (e) {
       state = CiudadanosError('Error al borrar localmente: ${e.toString()}');
     }
+  }
+
+  String _mensajeErrorEscritura(Object error) {
+    final mensaje = error.toString();
+
+    if (mensaje.contains('UNIQUE constraint failed') &&
+        mensaje.contains('ciudadanos.documento_identidad')) {
+      return 'Ya existe un ciudadano local con ese documento. Sincroniza los datos e intenta abrir el registro unificado.';
+    }
+
+    return 'Error al escribir localmente: ${mensaje.replaceAll('Exception: ', '')}';
   }
 
   List<Ciudadano> _filtrarLista(List<Ciudadano> lista, String query) {

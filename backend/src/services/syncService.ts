@@ -165,24 +165,47 @@ export class SyncService {
 
     // Caso C.1: No existe en PostgreSQL -> CREAR
     if (!ciudadanoExistente) {
-      await prisma.ciudadano.create({
-        data: {
-          id: ciudadanoId,
-          documentoIdentidad: payloadJson.documento_identidad,
-          nombres: payloadJson.nombres,
-          apellidos: payloadJson.apellidos,
-          fechaNacimiento: new Date(payloadJson.fecha_nacimiento),
-          telefono: payloadJson.telefono || null,
-          correo: payloadJson.correo || null,
-          estadoSincronizacion: 'SINCRONIZADO',
-          registradoPorUsuarioId: usuarioId,
-          registradoEnDispositivoId: dispositivoId,
-          version: payloadJson.version || 1,
-          metadatosCampos: payloadJson.metadatos_campos || {},
-          createdAt: new Date(payloadJson.created_at || new Date()),
-          updatedAt: new Date(),
-        },
-      });
+      try {
+        await prisma.ciudadano.create({
+          data: {
+            id: ciudadanoId,
+            documentoIdentidad: payloadJson.documento_identidad,
+            nombres: payloadJson.nombres,
+            apellidos: payloadJson.apellidos,
+            fechaNacimiento: new Date(payloadJson.fecha_nacimiento),
+            telefono: payloadJson.telefono || null,
+            correo: payloadJson.correo || null,
+            estadoSincronizacion: 'SINCRONIZADO',
+            registradoPorUsuarioId: usuarioId,
+            registradoEnDispositivoId: dispositivoId,
+            version: payloadJson.version || 1,
+            metadatosCampos: payloadJson.metadatos_campos || {},
+            createdAt: new Date(payloadJson.created_at || new Date()),
+            updatedAt: new Date(),
+          },
+        });
+      } catch (error: any) {
+        if (error?.code === 'P2002') {
+          const duplicadoTrasColision = await prisma.ciudadano.findFirst({
+            where: {
+              documentoIdentidad,
+              id: { not: ciudadanoId },
+            },
+          });
+
+          if (duplicadoTrasColision) {
+            return this.unificarDuplicadoPorDocumento(
+              tarea,
+              payloadJson,
+              duplicadoTrasColision,
+              usuarioId,
+              dispositivoId
+            );
+          }
+        }
+
+        throw error;
+      }
 
       await this.registrarLog(dispositivoId, usuarioId, 'CREACION_LWW');
       return { id: tarea.id, success: true };
@@ -233,6 +256,62 @@ export class SyncService {
         correo: registroActualizado.correo,
         version: registroActualizado.version,
         metadatos_campos: registroActualizado.metadatosCampos,
+      },
+    };
+  }
+
+  private async unificarDuplicadoPorDocumento(
+    tarea: SyncTaskPayload,
+    payloadJson: any,
+    duplicadoCedula: any,
+    usuarioId: string,
+    dispositivoId: string
+  ): Promise<SyncResult> {
+    logger.warn(
+      `Colision logica detectada: Documento ${payloadJson.documento_identidad} enviado con ID ${tarea.registroId} ya existe con ID ${duplicadoCedula.id}. Iniciando unificacion.`
+    );
+
+    const fusion = this.fusionarLwwPorCampo(
+      duplicadoCedula,
+      payloadJson,
+      (duplicadoCedula.metadatosCampos as unknown as MetadatosCampos) || {},
+      payloadJson.metadatos_campos || {}
+    );
+
+    await registrarVersionCiudadano(duplicadoCedula, 'Antes de unificar por sincronizacion');
+
+    const registroGanadorActualizado = await prisma.ciudadano.update({
+      where: { id: duplicadoCedula.id },
+      data: {
+        nombres: fusion.datos.nombres,
+        apellidos: fusion.datos.apellidos,
+        fechaNacimiento: new Date(fusion.datos.fecha_nacimiento),
+        telefono: fusion.datos.telefono,
+        correo: fusion.datos.correo,
+        version: Math.max(duplicadoCedula.version, payloadJson.version) + 1,
+        metadatosCampos: fusion.metadatos as any,
+        updatedAt: new Date(),
+        deletedAt: fusion.datos.deleted_at ? new Date(fusion.datos.deleted_at) : null,
+      },
+    });
+
+    await this.registrarLog(dispositivoId, usuarioId, `UNIFICACION_DUPLICADO_ID:${duplicadoCedula.id}`);
+
+    return {
+      id: tarea.id,
+      success: true,
+      conflicto: true,
+      unificadoId: duplicadoCedula.id,
+      datosServidor: {
+        id: registroGanadorActualizado.id,
+        documento_identidad: registroGanadorActualizado.documentoIdentidad,
+        nombres: registroGanadorActualizado.nombres,
+        apellidos: registroGanadorActualizado.apellidos,
+        fecha_nacimiento: registroGanadorActualizado.fechaNacimiento.toISOString(),
+        telefono: registroGanadorActualizado.telefono,
+        correo: registroGanadorActualizado.correo,
+        version: registroGanadorActualizado.version,
+        metadatos_campos: registroGanadorActualizado.metadatosCampos,
       },
     };
   }

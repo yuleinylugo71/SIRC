@@ -164,6 +164,63 @@ class UsuarioRepositoryImpl implements UsuarioRepository {
     }
   }
 
+  @override
+  Future<void> actualizarUsuario({
+    required String id,
+    required String correo,
+    required String nombre,
+    required String rol,
+    required String token,
+  }) async {
+    try {
+      await _dio.patch(
+        '/api/auth/users/$id',
+        data: {
+          'correo': correo,
+          'nombre': nombre.trim().isEmpty ? null : nombre.trim(),
+          'rol': rol,
+        },
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+    } on DioException catch (e) {
+      throw Exception(_mensajeErrorDio(e, 'Error al actualizar el usuario'));
+    }
+  }
+
+  @override
+  Future<void> cambiarContrasena({
+    required String contrasenaActual,
+    required String nuevaContrasena,
+    required String token,
+  }) async {
+    try {
+      final response = await _dio.patch(
+        '/api/auth/me/password',
+        data: {
+          'contrasenaActual': contrasenaActual,
+          'nuevaContrasena': nuevaContrasena,
+        },
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      final hashCache = response.data?['data']?['hashCache'] as String?;
+      final usuarioId = _prefs.getString('auth_usuario_id');
+      if (hashCache != null && usuarioId != null) {
+        await _usuarioDao.actualizarContrasena(usuarioId, hashCache);
+      }
+    } on DioException catch (e) {
+      throw Exception(_mensajeErrorDio(e, 'Error al cambiar la contrasena'));
+    }
+  }
+
   Usuario _mapToDomain(UsuarioLocal local) {
     return Usuario(
       id: local.id,

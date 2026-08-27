@@ -38,4 +38,18 @@ abstract class UsuarioRepository {
    * Obtiene la lista de usuarios/agentes desde el servidor (Solo permitido para administradores).
    */
   Future<List<Usuario>> obtenerUsuarios({required String token});
+
+  Future<void> actualizarUsuario({
+    required String id,
+    required String correo,
+    required String nombre,
+    required String rol,
+    required String token,
+  });
+
+  Future<void> cambiarContrasena({
+    required String contrasenaActual,
+    required String nuevaContrasena,
+    required String token,
+  });
 }

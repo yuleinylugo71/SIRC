@@ -97,4 +97,47 @@ export class AuthController {
       next(error);
     }
   }
+
+  public async actualizarUsuario(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { correo, nombre, rol } = req.body;
+
+      if (!correo && nombre === undefined && !rol) {
+        throw new BadRequestError('Debe enviar al menos un campo para actualizar');
+      }
+
+      logger.info(`Administrador actualizando usuario: ${id}`);
+      const usuario = await authService.actualizarUsuario(id, { correo, nombre, rol });
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Usuario actualizado exitosamente',
+        data: usuario,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async cambiarContrasena(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const user = req.user!;
+      const { contrasenaActual, nuevaContrasena } = req.body;
+
+      const hashCache = await authService.cambiarContrasena(
+        user.id,
+        contrasenaActual,
+        nuevaContrasena
+      );
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Contrasena actualizada exitosamente',
+        data: { hashCache },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../database/prisma';
 import { config } from '../core/config';
-import { UnauthorizedError, ConflictError } from '../core/exceptions';
+import { BadRequestError, UnauthorizedError, ConflictError, NotFoundError } from '../core/exceptions';
 
 export interface LoginResult {
   token: string;
@@ -176,5 +176,77 @@ export class AuthService {
     });
     return usuarios;
   }
-}
 
+  public async actualizarUsuario(
+    id: string,
+    data: { correo?: string; nombre?: string | null; rol?: string }
+  ): Promise<any> {
+    const usuario = await prisma.usuario.findUnique({ where: { id } });
+    if (!usuario || usuario.deletedAt) {
+      throw new NotFoundError('Usuario no encontrado');
+    }
+
+    if (data.correo && data.correo !== usuario.correo) {
+      const correoExistente = await prisma.usuario.findUnique({
+        where: { correo: data.correo },
+      });
+      if (correoExistente && correoExistente.id !== id) {
+        throw new ConflictError('El correo electronico ya se encuentra registrado');
+      }
+    }
+
+    if (data.rol && !['ADMIN', 'REGISTRADOR'].includes(data.rol)) {
+      throw new BadRequestError('Rol no valido');
+    }
+
+    const actualizado = await prisma.usuario.update({
+      where: { id },
+      data: {
+        correo: data.correo ?? usuario.correo,
+        nombre: data.nombre === undefined ? usuario.nombre : data.nombre,
+        rol: data.rol ?? usuario.rol,
+      },
+    });
+
+    return {
+      id: actualizado.id,
+      correo: actualizado.correo,
+      nombre: actualizado.nombre,
+      rol: actualizado.rol,
+      createdAt: actualizado.createdAt,
+      updatedAt: actualizado.updatedAt,
+    };
+  }
+
+  public async cambiarContrasena(
+    usuarioId: string,
+    contrasenaActual: string,
+    nuevaContrasena: string
+  ): Promise<string> {
+    if (!contrasenaActual || !nuevaContrasena) {
+      throw new BadRequestError('contrasenaActual y nuevaContrasena son obligatorias');
+    }
+
+    if (nuevaContrasena.length < 6) {
+      throw new BadRequestError('La nueva contrasena debe tener al menos 6 caracteres');
+    }
+
+    const usuario = await prisma.usuario.findUnique({ where: { id: usuarioId } });
+    if (!usuario || usuario.deletedAt) {
+      throw new NotFoundError('Usuario no encontrado');
+    }
+
+    const contrasenaValida = await bcrypt.compare(contrasenaActual, usuario.contrasena);
+    if (!contrasenaValida) {
+      throw new UnauthorizedError('La contrasena actual no es correcta');
+    }
+
+    const hashContrasena = await bcrypt.hash(nuevaContrasena, 10);
+    await prisma.usuario.update({
+      where: { id: usuarioId },
+      data: { contrasena: hashContrasena },
+    });
+
+    return hashContrasena;
+  }
+}

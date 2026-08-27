@@ -268,14 +268,13 @@ class _WebSideNav extends StatelessWidget {
                 selected: selected == 'ciudadanos',
                 onTap: () => context.go('/ciudadanos'),
               ),
-              _WebNavItem(
-                icon:
-                    isAdmin ? Icons.badge_rounded : Icons.lock_outline_rounded,
-                label: 'Agentes',
-                selected: selected == 'agentes',
-                enabled: isAdmin,
-                onTap: isAdmin ? () => context.go('/agentes') : null,
-              ),
+              if (isAdmin)
+                _WebNavItem(
+                  icon: Icons.badge_rounded,
+                  label: 'Agentes',
+                  selected: selected == 'agentes',
+                  onTap: () => context.go('/agentes'),
+                ),
               _WebNavItem(
                 icon: Icons.person_add_alt_1_rounded,
                 label: 'Registrar',

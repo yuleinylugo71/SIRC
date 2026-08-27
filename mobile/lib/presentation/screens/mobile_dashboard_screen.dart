@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/di/providers.dart';
 import '../bloc/auth_provider.dart';
+import '../bloc/sync_provider.dart';
 import '../theme/sirc_theme.dart';
 
 class MobileDashboardScreen extends ConsumerWidget {
@@ -12,6 +13,7 @@ class MobileDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authEstado = ref.watch(authProvider);
+    final syncEstado = ref.watch(syncProvider);
 
     if (authEstado is! AuthAuthenticated) {
       return const Scaffold(
@@ -22,6 +24,25 @@ class MobileDashboardScreen extends ConsumerWidget {
 
     final db = ref.watch(appDatabaseProvider);
     final isAdmin = authEstado.rol.trim().toUpperCase() == 'ADMIN';
+    final sincronizando = syncEstado is SyncLoading;
+
+    ref.listen<SyncState>(syncProvider, (prev, next) {
+      if (next is SyncSuccess) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.mensaje),
+            backgroundColor: SircColors.success,
+          ),
+        );
+      } else if (next is SyncError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.mensaje),
+            backgroundColor: SircColors.error,
+          ),
+        );
+      }
+    });
 
     return Scaffold(
       backgroundColor: const Color(0xFFEAF4FF),
@@ -92,6 +113,32 @@ class MobileDashboardScreen extends ConsumerWidget {
             label: 'Rol activo',
             value: authEstado.rol,
             wide: true,
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton.icon(
+            onPressed: sincronizando
+                ? null
+                : () => ref.read(syncProvider.notifier).sincronizar(),
+            icon: sincronizando
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2.2),
+                  )
+                : const Icon(Icons.sync_rounded),
+            label: Text(sincronizando ? 'Sincronizando' : 'Sincronizar datos'),
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size.fromHeight(52),
+              backgroundColor: SircColors.blue,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              textStyle: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
           ),
           const SizedBox(height: 24),
           const Text(
@@ -306,12 +353,11 @@ class _MobileBottomNav extends StatelessWidget {
           icon: Icon(Icons.people_alt_outlined),
           label: 'Ciudadanos',
         ),
-        NavigationDestination(
-          icon: Icon(
-            isAdmin ? Icons.badge_outlined : Icons.lock_outline_rounded,
+        if (isAdmin)
+          const NavigationDestination(
+            icon: Icon(Icons.badge_outlined),
+            label: 'Agentes',
           ),
-          label: 'Agentes',
-        ),
         const NavigationDestination(
           icon: Icon(Icons.menu_rounded),
           label: 'Mas',
@@ -319,8 +365,10 @@ class _MobileBottomNav extends StatelessWidget {
       ],
       onDestinationSelected: (index) {
         if (index == 1) context.push('/ciudadanos');
-        if (index == 2 && isAdmin) context.push('/agentes');
-        if (index == 3) context.push('/configuracion');
+        if (isAdmin && index == 2) context.push('/agentes');
+        if ((!isAdmin && index == 2) || (isAdmin && index == 3)) {
+          context.push('/configuracion');
+        }
       },
     );
   }

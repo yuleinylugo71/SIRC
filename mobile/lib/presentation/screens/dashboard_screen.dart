@@ -1711,19 +1711,18 @@ class _BottomNav extends StatelessWidget {
                     icon: Icon(Icons.home_filled), label: 'Inicio'),
                 const NavigationDestination(
                     icon: Icon(Icons.people_alt_outlined), label: 'Ciudadanos'),
-                NavigationDestination(
-                  icon: Icon(isAdmin
-                      ? Icons.badge_outlined
-                      : Icons.lock_outline_rounded),
-                  label: 'Agentes',
-                ),
+                if (isAdmin)
+                  const NavigationDestination(
+                      icon: Icon(Icons.badge_outlined), label: 'Agentes'),
                 const NavigationDestination(
                     icon: Icon(Icons.menu_rounded), label: 'Más'),
               ],
               onDestinationSelected: (index) {
                 if (index == 1) onCitizens();
-                if (index == 2 && onAgents != null) onAgents!();
-                if (index == 3) onMore();
+                if (isAdmin && index == 2 && onAgents != null) onAgents!();
+                if ((!isAdmin && index == 2) || (isAdmin && index == 3)) {
+                  onMore();
+                }
               },
             ),
           ),

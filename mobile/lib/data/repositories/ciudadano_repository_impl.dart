@@ -144,15 +144,15 @@ class CiudadanoRepositoryImpl implements CiudadanoRepository {
       createdAt: DateTime.now(),
     );
 
-    if (ciudadanoExistente != null) {
-      await _ciudadanoDao.registrarVersionAnterior(
-        ciudadanoExistente,
-        historialId: _uuid.v4(),
-        motivo: 'Edicion local',
-      );
-    }
-
-    await _syncQueueDao.guardarCiudadanoConCola(ciudadano: local, tarea: tarea);
+    await _ciudadanoDao.guardarCiudadanoResolviendoDocumento(
+      ciudadano: local,
+      ciudadanoAnterior: ciudadanoExistente,
+      historialIdAnterior: _uuid.v4(),
+      historialIdDuplicado: _uuid.v4(),
+      motivoAnterior: 'Edicion local',
+      motivoHistorial: 'Antes de unificar duplicado local por documento',
+    );
+    await _syncQueueDao.encolarTarea(tarea);
   }
 
   @override

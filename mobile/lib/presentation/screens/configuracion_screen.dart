@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/di/providers.dart';
 import '../bloc/auth_provider.dart';
 import '../bloc/sync_provider.dart';
 import '../theme/sirc_theme.dart';
@@ -33,6 +34,175 @@ class ConfiguracionScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _mostrarCambioContrasena(
+    BuildContext context,
+    WidgetRef ref,
+    String token,
+  ) async {
+    final actualController = TextEditingController();
+    final nuevaController = TextEditingController();
+    final confirmarController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    var guardando = false;
+    var mostrarActual = false;
+    var mostrarNueva = false;
+    var mostrarConfirmar = false;
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (builderContext, setDialogState) {
+            return AlertDialog(
+              title: const Text('Cambiar contrasena'),
+              content: Form(
+                key: formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextFormField(
+                        controller: actualController,
+                        obscureText: !mostrarActual,
+                        decoration: InputDecoration(
+                          labelText: 'Contrasena actual',
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            onPressed: () => setDialogState(
+                              () => mostrarActual = !mostrarActual,
+                            ),
+                            icon: Icon(mostrarActual
+                                ? Icons.visibility_off
+                                : Icons.visibility),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Ingresa la contrasena actual';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: nuevaController,
+                        obscureText: !mostrarNueva,
+                        decoration: InputDecoration(
+                          labelText: 'Nueva contrasena',
+                          prefixIcon: const Icon(Icons.password_rounded),
+                          suffixIcon: IconButton(
+                            onPressed: () => setDialogState(
+                              () => mostrarNueva = !mostrarNueva,
+                            ),
+                            icon: Icon(mostrarNueva
+                                ? Icons.visibility_off
+                                : Icons.visibility),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.length < 6) {
+                            return 'Minimo 6 caracteres';
+                          }
+                          if (value == actualController.text) {
+                            return 'Usa una contrasena diferente';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: confirmarController,
+                        obscureText: !mostrarConfirmar,
+                        decoration: InputDecoration(
+                          labelText: 'Confirmar contrasena',
+                          prefixIcon: const Icon(Icons.check_circle_outline),
+                          suffixIcon: IconButton(
+                            onPressed: () => setDialogState(
+                              () => mostrarConfirmar = !mostrarConfirmar,
+                            ),
+                            icon: Icon(mostrarConfirmar
+                                ? Icons.visibility_off
+                                : Icons.visibility),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value != nuevaController.text) {
+                            return 'Las contrasenas no coinciden';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed:
+                      guardando ? null : () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancelar'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: guardando
+                      ? null
+                      : () async {
+                          if (!(formKey.currentState?.validate() ?? false)) {
+                            return;
+                          }
+
+                          setDialogState(() => guardando = true);
+                          try {
+                            await ref
+                                .read(usuarioRepositoryProvider)
+                                .cambiarContrasena(
+                                  contrasenaActual: actualController.text,
+                                  nuevaContrasena: nuevaController.text,
+                                  token: token,
+                                );
+
+                            if (!context.mounted) return;
+                            Navigator.of(dialogContext).pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text('Contrasena actualizada correctamente.'),
+                                backgroundColor: SircColors.success,
+                              ),
+                            );
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            setDialogState(() => guardando = false);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  e.toString().replaceAll('Exception: ', ''),
+                                ),
+                                backgroundColor: SircColors.error,
+                              ),
+                            );
+                          }
+                        },
+                  icon: guardando
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.save_rounded),
+                  label: Text(guardando ? 'Guardando' : 'Guardar'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    actualController.dispose();
+    nuevaController.dispose();
+    confirmarController.dispose();
   }
 
   @override
@@ -114,6 +284,24 @@ class ConfiguracionScreen extends ConsumerWidget {
                           label: 'ID de Usuario',
                           value: authEstado.usuarioId,
                           icon: Icons.key_outlined,
+                        ),
+                        const Divider(),
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.password_rounded,
+                              color: SircColors.blue),
+                          title: const Text(
+                            'Cambiar contrasena',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle:
+                              const Text('Actualiza tu contrasena temporal'),
+                          trailing: const Icon(Icons.chevron_right_rounded),
+                          onTap: () => _mostrarCambioContrasena(
+                            context,
+                            ref,
+                            authEstado.token,
+                          ),
                         ),
                       ],
                     ),

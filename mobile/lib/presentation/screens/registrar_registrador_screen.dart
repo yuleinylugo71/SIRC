@@ -63,11 +63,12 @@ class _RegistrarRegistradorScreenState
       if (mounted) {
         setState(() => _cargando = false);
 
-        // Mostrar Dialog de Éxito
-        showDialog(
+        final nombreRegistrador = _nombreController.text.trim();
+
+        await showDialog<void>(
           context: context,
           barrierDismissible: false,
-          builder: (BuildContext context) {
+          builder: (BuildContext dialogContext) {
             return AlertDialog(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16)),
@@ -79,18 +80,12 @@ class _RegistrarRegistradorScreenState
                 ],
               ),
               content: Text(
-                'El registrador ${_nombreController.text} ha sido creado correctamente en el servidor central.',
+                'El registrador $nombreRegistrador ha sido creado correctamente en el servidor central.',
               ),
               actions: [
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).pop(); // Cerrar dialog
-                    if (kIsWeb) {
-                      context.go('/agentes');
-                    } else {
-                      Navigator.of(context)
-                          .pop(); // Volver a la pantalla anterior
-                    }
+                    Navigator.of(dialogContext).pop();
                   },
                   child: const Text('Entendido',
                       style: TextStyle(fontWeight: FontWeight.bold)),
@@ -99,6 +94,14 @@ class _RegistrarRegistradorScreenState
             );
           },
         );
+
+        if (!mounted) return;
+
+        if (kIsWeb) {
+          context.go('/agentes');
+        } else if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        }
       }
     } catch (e) {
       if (mounted) {

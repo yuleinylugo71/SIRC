@@ -138,11 +138,24 @@ class _CiudadanoFormScreenState extends ConsumerState<CiudadanoFormScreen> {
     // Escuchar el guardado exitoso para cerrar la pantalla
     ref.listen<CiudadanosEstado>(ciudadanosProvider, (prev, next) {
       if (next is CiudadanoOperacionExito) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.mensaje),
+            backgroundColor: SircColors.success,
+          ),
+        );
         if (kIsWeb) {
           context.go('/ciudadanos');
         } else {
           context.pop();
         }
+      } else if (next is CiudadanosError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.mensaje),
+            backgroundColor: SircColors.error,
+          ),
+        );
       }
     });
 

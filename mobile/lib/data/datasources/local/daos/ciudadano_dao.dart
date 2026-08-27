@@ -27,8 +27,57 @@ class CiudadanoDao extends DatabaseAccessor<AppDatabase> with _$CiudadanoDaoMixi
     return (select(ciudadanos)..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
+  Future<CiudadanoLocal?> obtenerCiudadanoPorDocumento(
+    String documentoIdentidad, {
+    String? excluirId,
+  }) {
+    final query = select(ciudadanos)
+      ..where((t) => t.documentoIdentidad.equals(documentoIdentidad));
+
+    if (excluirId != null && excluirId.isNotEmpty) {
+      query.where((t) => t.id.equals(excluirId).not());
+    }
+
+    return query.getSingleOrNull();
+  }
+
   Future<void> guardarCiudadano(CiudadanoLocal ciudadano) {
     return into(ciudadanos).insertOnConflictUpdate(ciudadano);
+  }
+
+  Future<void> guardarCiudadanoResolviendoDocumento({
+    required CiudadanoLocal ciudadano,
+    CiudadanoLocal? ciudadanoAnterior,
+    required String historialIdAnterior,
+    required String historialIdDuplicado,
+    String? motivoAnterior,
+    required String motivoHistorial,
+  }) {
+    return transaction(() async {
+      if (ciudadanoAnterior != null) {
+        await registrarVersionAnterior(
+          ciudadanoAnterior,
+          historialId: historialIdAnterior,
+          motivo: motivoAnterior ?? motivoHistorial,
+        );
+      }
+
+      final duplicado = await obtenerCiudadanoPorDocumento(
+        ciudadano.documentoIdentidad,
+        excluirId: ciudadano.id,
+      );
+
+      if (duplicado != null) {
+        await registrarVersionAnterior(
+          duplicado,
+          historialId: historialIdDuplicado,
+          motivo: motivoHistorial,
+        );
+        await eliminarCiudadanoFisico(duplicado.id);
+      }
+
+      await guardarCiudadano(ciudadano);
+    });
   }
 
   Future<void> registrarVersionAnterior(
@@ -142,6 +191,10 @@ class CiudadanoDao extends DatabaseAccessor<AppDatabase> with _$CiudadanoDaoMixi
           estadoSincronizacion: const Value('PENDIENTE'),
           updatedAt: Value(DateTime.now()),
         ));
+  }
+
+  Future<void> eliminarCiudadanoFisico(String id) {
+    return (delete(ciudadanos)..where((t) => t.id.equals(id))).go();
   }
 
   Future<void> actualizarEstadoSincronizacion(String id, String estado, int version) {

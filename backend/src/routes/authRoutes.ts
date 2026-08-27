@@ -18,4 +18,10 @@ router.post('/register', auth, adminOnly, authController.register.bind(authContr
 // GET /api/auth/users (protegido por token y adminOnly)
 router.get('/users', auth, adminOnly, authController.listarUsuarios.bind(authController));
 
+// PATCH /api/auth/users/:id (protegido por token y adminOnly)
+router.patch('/users/:id', auth, adminOnly, authController.actualizarUsuario.bind(authController));
+
+// PATCH /api/auth/me/password (protegido por token)
+router.patch('/me/password', auth, authController.cambiarContrasena.bind(authController));
+
 export default router;

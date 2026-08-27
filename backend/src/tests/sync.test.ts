@@ -11,6 +11,9 @@ jest.mock('../database/prisma', () => ({
       update: jest.fn(),
       updateMany: jest.fn(),
     },
+    ciudadanoHistorial: {
+      create: jest.fn(),
+    },
     logSincronizacion: {
       create: jest.fn(),
     },
@@ -77,12 +80,63 @@ describe('SyncService - Motor de Sincronización e Idempotencia', () => {
       nombres: 'Carlos',
       apellidos: 'Perez',
       fechaNacimiento: new Date('1995-05-15T00:00:00.000Z'),
+      telefono: null,
+      correo: null,
+      deletedAt: null,
       version: 2,
       metadatosCampos: { nombres: '2026-07-03T00:00:00.000Z' },
     };
 
     // Simular que ya existe un registro con la misma cédula pero diferente ID
     (prisma.ciudadano.findFirst as jest.Mock).mockResolvedValue(mockGanadorServidor);
+    (prisma.ciudadano.update as jest.Mock).mockResolvedValue(mockGanadorServidor);
+
+    const resultados = await syncService.procesarSincronizacion(
+      [tareaPayload],
+      'usuario-uuid',
+      'dispositivo-uuid'
+    );
+
+    expect(resultados[0].success).toBe(true);
+    expect(resultados[0].conflicto).toBe(true);
+    expect(resultados[0].unificadoId).toBe('ciudadano-uuid-ganador-servidor');
+    expect(prisma.ciudadano.update).toHaveBeenCalled();
+  });
+
+  test('sincronizar() - Reintenta como unificacion cuando PostgreSQL reporta cedula duplicada', async () => {
+    const tareaPayload = {
+      id: 'tarea-id-race',
+      tablaAfectada: 'ciudadanos',
+      registroId: 'ciudadano-uuid-provisional-2',
+      operacion: 'INSERT' as const,
+      payload: JSON.stringify({
+        documento_identidad: '123456',
+        nombres: 'Carlos',
+        apellidos: 'Perez',
+        fecha_nacimiento: '1995-05-15T00:00:00.000Z',
+        version: 1,
+        metadatos_campos: { nombres: '2026-07-03T01:00:00.000Z' },
+      }),
+    };
+
+    const mockGanadorServidor = {
+      id: 'ciudadano-uuid-ganador-servidor',
+      documentoIdentidad: '123456',
+      nombres: 'Carlos',
+      apellidos: 'Perez',
+      fechaNacimiento: new Date('1995-05-15T00:00:00.000Z'),
+      telefono: null,
+      correo: null,
+      deletedAt: null,
+      version: 2,
+      metadatosCampos: { nombres: '2026-07-03T00:00:00.000Z' },
+    };
+
+    (prisma.ciudadano.findFirst as jest.Mock)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(mockGanadorServidor);
+    (prisma.ciudadano.findUnique as jest.Mock).mockResolvedValue(null);
+    (prisma.ciudadano.create as jest.Mock).mockRejectedValue({ code: 'P2002' });
     (prisma.ciudadano.update as jest.Mock).mockResolvedValue(mockGanadorServidor);
 
     const resultados = await syncService.procesarSincronizacion(
@@ -127,6 +181,8 @@ describe('SyncService - Motor de Sincronización e Idempotencia', () => {
       apellidos: 'Perez',
       fechaNacimiento: new Date('1995-05-15T00:00:00.000Z'),
       telefono: '111111',
+      correo: null,
+      deletedAt: null,
       version: 1,
       metadatosCampos: {
         nombres: antesStr,
